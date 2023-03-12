@@ -1,0 +1,3 @@
+INDEX VERSION 1.131+/media/phuong/DATA/Spring_ly_thuyet/datetime/~/.emacs.d/.local/etc/java-workspace/.metadata/.plugins/org.eclipse.jdt.core
+3024771428.index
+1865797976.index

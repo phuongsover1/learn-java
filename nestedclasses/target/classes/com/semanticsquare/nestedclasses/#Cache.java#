@@ -1,0 +1,106 @@
+package com.semanticsquare.nestedclasses;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+interface CacheIterator {
+	boolean hasNext();
+
+	Bookmark next();
+
+}
+
+class FooBar {
+	protected int y;
+
+	FooBar(int x) {
+		y = x;
+	}
+}
+
+class Cache {
+
+	public Cache() {
+	}
+
+	private Bookmark[] items;
+	private int next = 0;
+	private static final Comparator<Bookmark> RATING_COMPARATOR = new Comparator<Bookmark>() {
+
+	}
+
+	private class MyCacheIterator implements CacheIterator {
+
+		static double price = 2.3;
+		private int i = 0;
+
+		@Override
+		public boolean hasNext() {
+			return i < items.length;
+		}
+
+		@Override
+		public Bookmark next() {
+			return items[i++];
+		}
+
+	}
+
+	public static void main(String... args) {
+		Cache recommendedItems = new Cache(5);
+
+		Bookmark item1 = new Bookmark(2000, "Use Final Liberally");
+		Bookmark item2 = new Bookmark(2001, "How do I import a pre-existing Java project into Eclipse");
+		Bookmark item3 = new Bookmark(2002, "Interface vs Abstract Class");
+		Bookmark item4 = new Bookmark(2003, "NTO tutorial");
+		Bookmark item5 = new Bookmark(2004, "Virtual Hosting");
+		item1.setRating(3.5);
+		item2.setRating(2.5);
+		item3.setRating(6.5);
+		item4.setRating(6.9);
+		item5.setRating(1.5);
+
+		recommendedItems.add(item1);
+		recommendedItems.add(item2);
+		recommendedItems.add(item3);
+		recommendedItems.add(item4);
+		recommendedItems.add(item5);
+
+		CacheIterator iterator = recommendedItems.iterator();
+		// hoac la ben duoi deu dung duoc
+		// CacheIterator iterator = recommendedItems.new MyCacheIterator();
+
+		while (iterator.hasNext()) {
+			Bookmark bookmark = iterator.next();
+			System.out.println(bookmark);
+		}
+
+		System.out.println("After sorting anonymous class....");
+		Arrays.sort(recommendedItems.items, RATING_COMPARATOR);
+		iterator = recommendedItems.iterator();
+		while (iterator.hasNext()) {
+			Bookmark bookmark = iterator.next();
+			System.out.println(bookmark);
+		}
+
+		List<Bookmark> list1 = Arrays.asList(recommendedItems.items);
+		List<Bookmark> list2 = new ArrayList<>(list1);
+		Collections.sort(list1, new Bookmark.ComparatorList.RatingComparator());
+
+		System.out.println("After sorting using static class....");
+		list1.forEach(((t) -> System.out.println(t)));
+
+		System.out.println("After sorting using static class (Title)");
+		Collections.sort(list2, new Bookmark.ComparatorList.TitleComparator());
+		list2.forEach(((t) -> System.out.println(t)));
+		// new FooBar(5) {
+		// void go() {
+		// System.out.println("\nPringting y in FooBar.go: " + y);
+		// }
+		// }.go();
+		// ;
+	}
+}

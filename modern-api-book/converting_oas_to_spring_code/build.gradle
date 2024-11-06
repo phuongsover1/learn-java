@@ -68,3 +68,5 @@ swaggerSources {
 		}
 	}
 }
+
+compileJava.dependsOn swaggerSources.eStore.code

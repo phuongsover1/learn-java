@@ -198,7 +198,7 @@ create TABLE IF NOT EXISTS ecomm.cart (
     );
 
 create TABLE IF NOT EXISTS ecomm.cart_item (
-    id uuid NOT NULL DEFAULT random_uuid(),
+    cart_id uuid NOT NULL DEFAULT random_uuid(),
     item_id uuid NOT NULL DEFAULT random_uuid(),
     FOREIGN KEY (cart_id)
     REFERENCES ecomm.cart(id),

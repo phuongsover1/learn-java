@@ -867,6 +867,9 @@ components:
     Address:
       type: object
       properties:
+        id:
+          description: Address Identifier
+          type: string
         number:
           description: house of flat number
           type: string
@@ -893,6 +896,9 @@ components:
     Card:
       type: object
       properties:
+        id:
+          description: Card Identifier
+          type: string
         cardNumber:
           description: Card Number
           type: string
@@ -987,24 +993,27 @@ components:
       description: Contains the new order request information
       type: object
       properties:
-        customer:
-          #description: URI that should be used to fetch the customer
-          $ref: "#/components/schemas/URI"
+        customerId:
+          type: string
         address:
-          #description: URI that should be used to fetch the address
-          $ref: "#/components/schemas/URI"
+          $ref: "#/components/schemas/Address"
         card:
-          #description: URI that should be used to fetch the payment card
-          $ref: "#/components/schemas/URI"
+          $ref: "#/components/schemas/Card"
         items:
-          #description: URI that should be used to fetch the items from shopping cart
-          $ref: "#/components/schemas/URI"
+          description: Items in shopping cart
+          type: array
+          items:
+            $ref: "#/components/schemas/Item"
       xml:
         name: NewOrder
     URI:
       type: object
       xml:
         name: URI
+    BigDecimal:
+      type: object
+      xml:
+        name: BigDecimal
     Authorization:
       type: object
       properties:

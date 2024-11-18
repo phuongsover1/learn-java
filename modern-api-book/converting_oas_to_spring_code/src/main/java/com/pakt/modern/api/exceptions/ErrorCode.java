@@ -18,7 +18,8 @@ public enum ErrorCode {
       """
            Make sure request payload should be a valid JSON or XML\s
            object according to 'Content-Type'.
-          """);
+          """),
+  RESOURCE_NOT_FOUND("PACKT-0010", "Requested resource not found");
 
   private final String errCode;
   private final String errMsgKey;

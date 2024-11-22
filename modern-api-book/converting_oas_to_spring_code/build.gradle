@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '3.0.1'
+    id 'org.springframework.boot' version '3.0.8'
     id 'io.spring.dependency-management' version '1.1.0'
     id 'java'
     id 'org.hidetake.swagger.generator' version '2.19.2'
@@ -7,7 +7,7 @@ plugins {
 
 group = 'com.packt.modern.api'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = JavaVersion.VERSION_17
 
 processResources {
   dependsOn(generateSwaggerCode)
@@ -27,7 +27,6 @@ swaggerSources {
             rawOptions = ['--ignore-file-override', ignoreFile, '--type-mappings',
                           typeMappings, '--import-mappings', importMappings] as List<String>
             components = [models: true, apis: true, supportingFiles: 'ApiUtil.java']
-            dependsOn validation
         }
     }
 }
@@ -60,4 +59,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'com.h2database:h2'
+}
+
+bootJar {
+    manifest {
+        attributes 'Implementation-Version': "${version}"
+        attributes 'Implementation-Title': "${project.name}"
+        attributes 'Manifest-Version': "1.0"
+    }
 }

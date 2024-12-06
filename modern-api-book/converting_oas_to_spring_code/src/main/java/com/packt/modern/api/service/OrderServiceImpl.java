@@ -1,6 +1,7 @@
 package com.packt.modern.api.service;
 
 import com.packt.modern.api.entity.OrderEntity;
+import com.packt.modern.api.entity.ShipmentEntity;
 import com.packt.modern.api.exceptions.ResourceNotFoundException;
 import com.packt.modern.api.model.NewOrder;
 import com.packt.modern.api.repository.OrderRepository;
@@ -51,5 +52,10 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public Optional<OrderEntity> getByOrderId(String id) {
     return oRepo.findById(UUID.fromString(id));
+  }
+
+  @Override
+  public Optional<ShipmentEntity> getShipmentByOrderId(String id) {
+    return Optional.empty();
   }
 }

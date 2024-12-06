@@ -99,7 +99,7 @@ create TABLE IF NOT EXISTS ecomm.address (
     );
 
 create TABLE IF NOT EXISTS ecomm.user_address (
-    id uuid NOT NULL DEFAULT random_uuid(),
+    user_id uuid NOT NULL DEFAULT random_uuid(),
     address_id uuid NOT NULL,
     FOREIGN KEY (user_id)
     REFERENCES ecomm."user"(id),

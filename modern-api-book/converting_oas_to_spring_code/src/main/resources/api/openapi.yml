@@ -710,14 +710,10 @@ paths:
           content:
             application/xml:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Shipment'
+                $ref : '#/components/schemas/Shipment'
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Shipment'
+                $ref : '#/components/schemas/Shipment'
   /api/v1/products:
     get:
       tags:

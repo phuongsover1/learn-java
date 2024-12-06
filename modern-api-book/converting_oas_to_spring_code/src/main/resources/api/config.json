@@ -8,6 +8,7 @@
   "serializableModel": true,
   "useTags": true,
   "useGzipFeature": true,
+  "_comment": "below is adding support for hateoas for OpenAPI Codegen",
   "hateoas": true,
   "unhandledException": true,
   "useSpringBoot3": true,

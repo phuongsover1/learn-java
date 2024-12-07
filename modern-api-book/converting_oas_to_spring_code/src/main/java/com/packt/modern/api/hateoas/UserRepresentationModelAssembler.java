@@ -25,6 +25,8 @@ public class UserRepresentationModelAssembler extends RepresentationModelAssembl
     User resource = createModelWithId(entity.getId(), entity);
     BeanUtils.copyProperties(entity, resource);
 
+    resource.setId(entity.getId().toString());
+
     resource.add(
         linkTo(methodOn(CustomerController.class).getCustomerById(entity.getId().toString())).withSelfRel()
     );

@@ -50,7 +50,8 @@ public class CartServiceImpl implements CartService {
 
   @Override
   public void deleteCart(String customerId) {
-
+    CartEntity cartEntity = getCartByCustomerId(customerId);
+    cRepo.deleteById(cartEntity.getId());
   }
 
   @Override

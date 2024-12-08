@@ -13,6 +13,7 @@
   "unhandledException": true,
   "useSpringBoot3": true,
   "useSwaggerUI": true,
+  "reactive": true,
   "typeMappings": {
     "URI": "URI",
     "BigDecimal": "BigDecimal",

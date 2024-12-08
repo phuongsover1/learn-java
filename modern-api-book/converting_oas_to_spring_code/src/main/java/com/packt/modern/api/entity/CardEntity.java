@@ -22,7 +22,7 @@ public class CardEntity {
   @Column(name = "CVV")
   private String cvv;
 
-  @OneToOne
+  @ManyToOne
   @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
   private UserEntity user;
 

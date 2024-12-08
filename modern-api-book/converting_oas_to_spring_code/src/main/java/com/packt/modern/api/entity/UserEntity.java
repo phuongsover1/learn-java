@@ -46,7 +46,7 @@ public class UserEntity {
   )
   private List<AddressEntity> addresses = new ArrayList<>();
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CardEntity> cards;
 
   @OneToOne(mappedBy = "user", orphanRemoval = true, fetch = FetchType.LAZY)

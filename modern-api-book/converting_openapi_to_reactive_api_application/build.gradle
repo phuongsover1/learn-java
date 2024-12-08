@@ -52,8 +52,9 @@ dependencies {
     implementation 'io.springfox:springfox-oas:3.0.0'
     // OpenAPI Ends
 
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux' // change to use webflux
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test' // adding reactor test library
 
     // database dependencies
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

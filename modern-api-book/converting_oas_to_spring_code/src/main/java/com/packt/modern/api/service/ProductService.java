@@ -12,5 +12,5 @@ public interface ProductService {
   @NotNull
   Iterable<ProductEntity> getAllProducts();
 
-  Optional<ProductEntity> getProduct(@Min(value = 1L, message = "Invalid product ID.") String id);
+  Optional<ProductEntity> getProduct(String id);
 }

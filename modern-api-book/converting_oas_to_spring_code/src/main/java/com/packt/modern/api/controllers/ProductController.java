@@ -1,6 +1,7 @@
 package com.packt.modern.api.controllers;
 
 import com.packt.modern.api.ProductApi;
+import com.packt.modern.api.entity.ProductEntity;
 import com.packt.modern.api.hateoas.ProductRepresentationAssembler;
 import com.packt.modern.api.model.Product;
 import com.packt.modern.api.service.ProductService;

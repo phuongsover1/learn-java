@@ -22,7 +22,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 
   @Override
   public Optional<ShipmentEntity> getShipmentByOrderId(
-      @Min(value = 1L, message = "Invalid shipment ID.") String id) {
+      String id) {
     return oRepo.findById(UUID.fromString(id)).map(OrderEntity::getShipments);
   }
 }

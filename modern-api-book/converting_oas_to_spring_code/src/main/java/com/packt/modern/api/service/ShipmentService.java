@@ -6,5 +6,5 @@ import jakarta.validation.constraints.Min;
 import java.util.Optional;
 
 public interface ShipmentService {
-  Optional<ShipmentEntity> getShipmentByOrderId(@Min(value = 1L, message = "Invalid product ID") String id);
+  Optional<ShipmentEntity> getShipmentByOrderId(String id);
 }

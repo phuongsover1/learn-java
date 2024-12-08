@@ -24,7 +24,9 @@ public enum ErrorCode {
   GENERIC_ALREADY_EXISTS("PACKT-0012", "Already exists"),
   ITEM_NOT_FOUND("PACKT-0013", "Requested item not found"),
   ILLEGAL_ARGUMENT_EXCEPTION("PACKT-0014", "Invalid data passed."),
-  CONSTRAINT_VIOLATION("PACKT-0015", "Validation failed.");
+  CONSTRAINT_VIOLATION("PACKT-0015", "Validation failed."),
+  CARD_ALREADY_EXISTS("PACKT-0016", "Card already exists"),
+  GENERIC_STATUS_ERROR("PACKT-0017", "Status error." );
 
 
   private final String errCode;

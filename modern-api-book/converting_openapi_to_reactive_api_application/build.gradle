@@ -56,10 +56,16 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test' // adding reactor test library
 
-    // database dependencies
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // DB Starts
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'com.h2database:h2'
+    runtimeOnly 'io.r2dbc:r2dbc-h2'
+    // DB Ends
+
+    // Flyway: Start
     implementation 'org.flywaydb:flyway-core'
-    runtimeOnly 'com.h2database:h2'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    // Flyway: End
 }
 
 bootJar {

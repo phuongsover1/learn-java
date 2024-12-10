@@ -1,7 +1,7 @@
 package com.packt.modern.api.hateoas;
 
-import com.packt.modern.api.entity.UserEntity;
-import com.packt.modern.api.model.User;
+import com.packt.modern.api.entity.ShipmentEntity;
+import com.packt.modern.api.model.Shipment;
 import jakarta.annotation.Nullable;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -13,11 +13,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Component
-public class UserRepresentationModelAssembler implements
-    ReactiveRepresentationModelAssembler<UserEntity, User>, HateoasSupport {
+public class ShipmentRepresentationModelAssembler implements
+    ReactiveRepresentationModelAssembler<ShipmentEntity, Shipment>, HateoasSupport {
   private static String serverUri = null;
 
   private String getServerUri(@Nullable ServerWebExchange exchange) {
@@ -28,35 +27,24 @@ public class UserRepresentationModelAssembler implements
   }
 
   /**
-   * Coverts the User entity to resource
-   *
+   * Coverts the Shipment entity to resource
    * @param entity
+   * @return
    */
   @Override
-  public Mono<User> toModel(UserEntity entity, ServerWebExchange exchange) {
+  public Mono<Shipment> toModel(ShipmentEntity entity, ServerWebExchange exchange) {
     return Mono.just(entityToModel(entity, exchange));
   }
 
-  public User entityToModel(UserEntity entity, ServerWebExchange exchange) {
-    User resource = new User();
-    if (Objects.isNull(entity)) {
+  public Shipment entityToModel(ShipmentEntity entity, ServerWebExchange exchange) {
+    Shipment resource = new Shipment();
+    if(Objects.isNull(entity)) {
       return resource;
     }
     BeanUtils.copyProperties(entity, resource);
-    resource.setId(entity.getId().toString());
     String serverUri = getServerUri(exchange);
-    resource.add(Link.of(String.format("%s/api/v1/customers", serverUri)).withRel("customers"));
-    resource
-        .add(Link.of(String.format("%s/api/v1/customers/%s", serverUri, entity.getId())).withSelfRel());
-    resource
-        .add(Link.of(String.format("%s/api/v1/customers/%s/addresses", serverUri, entity.getId())).withRel("self_addresses"));
+    resource.add(Link.of(String.format("%s/api/v1/shipping/%s", serverUri, entity.getId())).withRel("self"));
     return resource;
-  }
-
-  public User getModel(Mono<User> m, ServerWebExchange exchange) {
-    AtomicReference<User> model = new AtomicReference<>();
-    m.cache().subscribe(i -> model.set(i));
-    return model.get();
   }
 
   /**
@@ -64,10 +52,11 @@ public class UserRepresentationModelAssembler implements
    *
    * @param entities
    */
-  public Flux<User> toListModel(Flux<UserEntity> entities, ServerWebExchange exchange) {
+  public Flux<Shipment> toListModel(Flux<ShipmentEntity> entities, ServerWebExchange exchange) {
     if (Objects.isNull(entities)) {
       return Flux.empty();
     }
     return Flux.from(entities.map(e -> entityToModel(e, exchange)));
   }
 }
+

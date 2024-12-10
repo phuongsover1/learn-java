@@ -1,7 +1,6 @@
 package com.packt.modern.api.controllers;
 
 import com.packt.modern.api.CardApi;
-import com.packt.modern.api.hateoas.CardRepresentationModelAssembler;
 import com.packt.modern.api.model.AddCardReq;
 import com.packt.modern.api.model.Card;
 import com.packt.modern.api.service.CardService;

@@ -1,7 +1,6 @@
 package com.packt.modern.api.controllers;
 
 import com.packt.modern.api.PaymentApi;
-import com.packt.modern.api.hateoas.PaymentRepresentationAssembler;
 import com.packt.modern.api.model.Authorization;
 import com.packt.modern.api.model.PaymentReq;
 import com.packt.modern.api.service.PaymentService;

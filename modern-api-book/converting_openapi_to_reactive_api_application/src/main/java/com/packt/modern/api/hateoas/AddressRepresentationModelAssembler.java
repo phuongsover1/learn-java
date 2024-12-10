@@ -1,43 +1,69 @@
 package com.packt.modern.api.hateoas;
 
-import com.packt.modern.api.controllers.AddressController;
 import com.packt.modern.api.entity.AddressEntity;
 import com.packt.modern.api.model.Address;
+import jakarta.annotation.Nullable;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.reactive.ReactiveRepresentationModelAssembler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.StreamSupport;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class AddressRepresentationModelAssembler extends RepresentationModelAssemblerSupport<AddressEntity, Address> {
+public class AddressRepresentationModelAssembler implements
+    ReactiveRepresentationModelAssembler<AddressEntity, Address>, HateoasSupport {
 
-  public AddressRepresentationModelAssembler() {
-    super(AddressController.class, Address.class);
+  private static String serverUri = null;
+
+  /**
+   * Converts the Address entity to resource
+   *
+   * @param entity
+   * @param exchange
+   * @return address resource
+   */
+  @Override
+  public Mono<Address> toModel(AddressEntity entity, ServerWebExchange exchange) {
+    return Mono.just(entityToModel(entity, exchange));
   }
 
-  @Override
-  public Address toModel(AddressEntity entity) {
-    String aId = Objects.nonNull(entity.getId()) ? entity.getId().toString() : null;
-    Address resource = new Address();
-    BeanUtils.copyProperties(entity, resource);
-    resource.setId(aId);
+  private String getServerUri(@Nullable ServerWebExchange exchange) {
+    if (Strings.isBlank(serverUri)) {
+      serverUri = getUriComponentsBuilder(exchange).toUriString();
+    }
+    return serverUri;
+  }
 
-    resource.add(linkTo(methodOn(AddressController.class).getAddressesById(aId)).withSelfRel());
+  public Address entityToModel(AddressEntity entity, ServerWebExchange exchange) {
+    Address resource = new Address();
+    if (Objects.isNull(entity)) {
+      return resource;
+    }
+    BeanUtils.copyProperties(entity, resource);
+    resource.setId(entity.getId().toString());
+    String serverUri = getServerUri(exchange);
+
+    resource.add(Link.of(String.format("%s/api/v1/addresses", serverUri)).withRel("addresses"));
+    resource.add(Link.of(String.format("%s/api/v1/addresses/%s", serverUri, resource.getId())).withSelfRel());
     return resource;
   }
 
-  public List<Address> toModelList(Iterable<AddressEntity> entities) {
+  /**
+   * Converts the collection of Address entities to list of resource
+   * @param entities
+   * @param exchange
+   * @return list of address resource
+   */
+  public Flux<Address> toListModel(Flux<AddressEntity> entities, ServerWebExchange exchange) {
     if (Objects.isNull(entities)) {
-      return List.of();
+      return Flux.empty();
     }
-    return StreamSupport.stream(
-        entities.spliterator(), false
-    ).map(this::toModel).toList();
+
+    return Flux.from(entities.map(e -> entityToModel(e, exchange)));
   }
 }

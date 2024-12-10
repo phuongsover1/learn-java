@@ -1,7 +1,9 @@
 package com.packt.modern.api.hateoas;
 
-import com.packt.modern.api.entity.UserEntity;
-import com.packt.modern.api.model.User;
+import com.packt.modern.api.entity.ProductEntity;
+import com.packt.modern.api.entity.TagEntity;
+import com.packt.modern.api.model.Product;
+import com.packt.modern.api.model.Tag;
 import jakarta.annotation.Nullable;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
@@ -12,12 +14,15 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
+
+import static java.util.stream.Collectors.toList;
 
 @Component
-public class UserRepresentationModelAssembler implements
-    ReactiveRepresentationModelAssembler<UserEntity, User>, HateoasSupport {
+public class ProductRepresentationModelAssembler implements
+    ReactiveRepresentationModelAssembler<ProductEntity, Product>, HateoasSupport {
+
   private static String serverUri = null;
 
   private String getServerUri(@Nullable ServerWebExchange exchange) {
@@ -28,35 +33,35 @@ public class UserRepresentationModelAssembler implements
   }
 
   /**
-   * Coverts the User entity to resource
+   * Coverts the Product entity to resource
    *
    * @param entity
    */
   @Override
-  public Mono<User> toModel(UserEntity entity, ServerWebExchange exchange) {
+  public Mono<Product> toModel(ProductEntity entity, ServerWebExchange exchange) {
     return Mono.just(entityToModel(entity, exchange));
   }
 
-  public User entityToModel(UserEntity entity, ServerWebExchange exchange) {
-    User resource = new User();
+  public Product entityToModel(ProductEntity entity, ServerWebExchange exchange) {
+    Product resource = new Product();
     if (Objects.isNull(entity)) {
       return resource;
     }
     BeanUtils.copyProperties(entity, resource);
     resource.setId(entity.getId().toString());
-    String serverUri = getServerUri(exchange);
-    resource.add(Link.of(String.format("%s/api/v1/customers", serverUri)).withRel("customers"));
-    resource
-        .add(Link.of(String.format("%s/api/v1/customers/%s", serverUri, entity.getId())).withSelfRel());
-    resource
-        .add(Link.of(String.format("%s/api/v1/customers/%s/addresses", serverUri, entity.getId())).withRel("self_addresses"));
+    resource.setTag(tagFromEntities(entity.getTags()));
+    resource.add(Link.of("/api/v1/products").withRel("products"));
+    resource.add(Link.of(String.format("/api/v1/Products/%s", entity.getId())).withSelfRel());
     return resource;
   }
 
-  public User getModel(Mono<User> m, ServerWebExchange exchange) {
-    AtomicReference<User> model = new AtomicReference<>();
-    m.cache().subscribe(i -> model.set(i));
-    return model.get();
+  public List<Tag> tagFromEntities(List<TagEntity> tags) {
+    return tags.stream().map(t -> {
+      Tag tag = new Tag();
+      BeanUtils.copyProperties(t, tag);
+      tag.setId(t.getId().toString());
+      return tag;
+    }).collect(toList());
   }
 
   /**
@@ -64,7 +69,7 @@ public class UserRepresentationModelAssembler implements
    *
    * @param entities
    */
-  public Flux<User> toListModel(Flux<UserEntity> entities, ServerWebExchange exchange) {
+  public Flux<Product> toListModel(Flux<ProductEntity> entities, ServerWebExchange exchange) {
     if (Objects.isNull(entities)) {
       return Flux.empty();
     }

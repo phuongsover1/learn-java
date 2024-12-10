@@ -1,50 +1,73 @@
 package com.packt.modern.api.hateoas;
 
-import com.packt.modern.api.controllers.CardController;
 import com.packt.modern.api.entity.CardEntity;
 import com.packt.modern.api.model.Card;
+import jakarta.annotation.Nullable;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.reactive.ReactiveRepresentationModelAssembler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.StreamSupport;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class CardRepresentationModelAssembler extends RepresentationModelAssemblerSupport<CardEntity, Card> {
-  public CardRepresentationModelAssembler() {
-    super(CardController.class, Card.class);
+public class CardRepresentationModelAssembler implements
+    ReactiveRepresentationModelAssembler<CardEntity, Card>, HateoasSupport {
+
+  private static String serverUri = null;
+
+  private String getServerUri(@Nullable ServerWebExchange exchange) {
+    if (Strings.isBlank(serverUri)) {
+      serverUri = getUriComponentsBuilder(exchange).toUriString();
+    }
+    return serverUri;
   }
 
+  /**
+   * Converts card entity to resource
+   * @param entity
+   * @param exchange
+   * @return
+   */
   @Override
-  public Card toModel(CardEntity entity) {
-    String cId = Objects.nonNull(entity.getId()) ? entity.getId().toString() : null;
-    String uId = Objects.nonNull(entity.getUser().getId()) ? entity.getUser().getId().toString() : null;
+  public Mono<Card> toModel(CardEntity entity, ServerWebExchange exchange) {
+    return Mono.just(entityToModel(entity, exchange));
+  }
 
+  private Card entityToModel(CardEntity entity, ServerWebExchange exchange) {
     Card resource = new Card();
-    BeanUtils.copyProperties(entity, resource);
-    resource.id(cId).userId(uId);
-
-    try {
-      resource.add(linkTo(methodOn(CardController.class).getCardById(cId)).withSelfRel());
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    if (Objects.isNull(entity)) {
+      return resource;
     }
+
+    BeanUtils.copyProperties(entity, resource);
+    resource.setId(Objects.nonNull(entity.getId()) ? entity.getId().toString() :  "");
+    resource.setCardNumber(entity.getNumber());
+    resource.setUserId(Objects.nonNull(entity.getUser()) ?  entity.getUser().getId().toString() :  "");
+    String serverUri = getServerUri(exchange);
+
+    resource.add(Link.of(String.format("%s/api/v1/cards", serverUri)).withRel("cards"));
+    resource.add(
+        Link.of(String.format("%s/api/v1/cards/%s", serverUri, entity.getId())).withRel("self")
+    );
 
     return resource;
   }
 
-  public List<Card> toModelList(Iterable<CardEntity> entities) {
+  /**
+   * Converts List of card entity to list of resource
+   * @param entities
+   * @param exchange
+   * @return list of card resource
+   */
+  public Flux<Card> tolistModel(Flux<CardEntity> entities, ServerWebExchange exchange) {
     if (Objects.isNull(entities)) {
-      return List.of();
+      return Flux.empty();
     }
-    return StreamSupport.stream(
-            entities.spliterator(), false
-        ).map(this::toModel)
-        .toList();
+    return Flux.from(entities.map(e -> entityToModel(e, exchange)));
   }
 }

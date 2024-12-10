@@ -1,7 +1,6 @@
 package com.packt.modern.api.controllers;
 
 import com.packt.modern.api.CartApi;
-import com.packt.modern.api.hateoas.CartRepresentationModelAssembler;
 import com.packt.modern.api.model.Cart;
 import com.packt.modern.api.model.Item;
 import com.packt.modern.api.service.CartService;
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.springframework.http.ResponseEntity.*;

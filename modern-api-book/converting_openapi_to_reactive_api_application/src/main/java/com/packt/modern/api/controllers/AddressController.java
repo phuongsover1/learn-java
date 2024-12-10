@@ -1,12 +1,10 @@
 package com.packt.modern.api.controllers;
 
 import com.packt.modern.api.AddressApi;
-import com.packt.modern.api.hateoas.AddressRepresentationModelAssembler;
 import com.packt.modern.api.model.AddAddressReq;
 import com.packt.modern.api.model.Address;
 import com.packt.modern.api.service.AddressService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

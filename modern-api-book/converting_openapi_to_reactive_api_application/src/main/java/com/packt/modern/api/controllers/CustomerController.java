@@ -1,9 +1,6 @@
 package com.packt.modern.api.controllers;
 
 import com.packt.modern.api.CustomerApi;
-import com.packt.modern.api.hateoas.AddressRepresentationModelAssembler;
-import com.packt.modern.api.hateoas.CardRepresentationModelAssembler;
-import com.packt.modern.api.hateoas.UserRepresentationModelAssembler;
 import com.packt.modern.api.model.Address;
 import com.packt.modern.api.model.Card;
 import com.packt.modern.api.model.User;

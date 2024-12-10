@@ -1,7 +1,6 @@
 package com.packt.modern.api.controllers;
 
 import com.packt.modern.api.OrderApi;
-import com.packt.modern.api.hateoas.OrderRepresentationModelAssembler;
 import com.packt.modern.api.model.NewOrder;
 import com.packt.modern.api.model.Order;
 import com.packt.modern.api.service.OrderService;

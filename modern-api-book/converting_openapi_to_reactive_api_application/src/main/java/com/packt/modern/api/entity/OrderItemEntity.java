@@ -1,25 +1,25 @@
 package com.packt.modern.api.entity;
 
-import jakarta.persistence.*;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.Objects;
 import java.util.UUID;
 
-@Entity
-@Table(name = "order_item")
+@Table(name = "ecomm.order_item")
 public class OrderItemEntity {
 
   @Id
-  @GeneratedValue
-  @Column(name = "ID", updatable = false, nullable = false)
+  @Column("id")
   private UUID id;
 
-  @Column(name = "ORDER_ID")
+  @Column("order_id")
   private UUID orderId;
 
-  @Column(name = "ITEM_ID")
+  @Column("item_id")
   private UUID itemId;
-
 
   public UUID getId() {
     return id;

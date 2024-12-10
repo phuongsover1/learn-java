@@ -1,32 +1,30 @@
 package com.packt.modern.api.entity;
 
-import jakarta.persistence.*;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.List;
 import java.util.UUID;
 
-@Entity
-@Table(name = "card")
+@Table("ecomm.card")
 public class CardEntity {
   @Id
-  @GeneratedValue
-  @Column(name = "ID", updatable = false, nullable = false)
+  @Column("id")
   private UUID id;
 
-  @Column(name = "NUMBER")
+  @Column("number")
   private String number;
 
-  @Column(name = "EXPIRES")
+  @Column("expires")
   private String expires;
 
-  @Column(name = "CVV")
+  @Column("cvv")
   private String cvv;
 
-  @ManyToOne
-  @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
   private UserEntity user;
 
-  @OneToMany(mappedBy = "cardEntity", fetch = FetchType.LAZY, orphanRemoval = true)
   private List<OrderEntity> orders;
 
   public UUID getId() {

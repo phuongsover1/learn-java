@@ -1,61 +1,61 @@
 package com.packt.modern.api.entity;
 
 import com.packt.modern.api.model.Order;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
-@Entity
 @Table(name = "orders")
 public class OrderEntity {
   @Id
-  @GeneratedValue
-  @Column(name = "ID", nullable = false, updatable = false)
+  @Column("id")
   private UUID id;
 
-  @Column(name = "TOTAL")
+  @Column("customer_id")
+  private UUID customerId;
+
+  @Column("address_id")
+  private UUID addressId;
+
+  @Column("total")
   private BigDecimal total;
 
-  @Column(name = "STATUS")
-  @Enumerated(EnumType.STRING)
-  private Order.StatusEnum status;
-
-  @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  @JoinColumn(name = "CUSTOMER_ID", nullable = false)
-  private UserEntity userEntity;
-
-  @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  @JoinColumn(name = "ADDRESS_ID", referencedColumnName = "ID", insertable = false, updatable = false)
-  private AddressEntity addressEntity;
-
-  @OneToOne(cascade = CascadeType.ALL )
-  @JoinColumn(name = "PAYMENT_ID", referencedColumnName = "ID")
-  private PaymentEntity paymentEntity;
-
-  @JoinColumn(name = "SHIPMENT_ID", referencedColumnName = "ID")
-  @OneToOne
-  private ShipmentEntity shipment;
-
-  @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  @JoinColumn(name = "CARD_ID", referencedColumnName = "ID")
-  private CardEntity cardEntity;
-
-  @Column(name = "ORDER_DATE")
+  @Column("order_date")
   private Timestamp orderDate;
 
-  @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  @JoinTable(
-      name = "ORDER_ITEM",
-      joinColumns = @JoinColumn(name = "ORDER_ID"),
-      inverseJoinColumns = @JoinColumn(name = "ITEM_ID")
-  )
+  @Column("card_id")
+  private UUID cardId;
+
+  @Column("payment_id")
+  private UUID paymentId;
+
+  @Column("status")
+  private Order.StatusEnum status;
+
+  @Column("shipment_id")
+  private UUID shipmentId;
+
+  private UUID cartId;
+
+  private UserEntity userEntity;
+
+  private AddressEntity addressEntity;
+
+  private PaymentEntity paymentEntity;
+
+  private ShipmentEntity shipment;
+
+  private CardEntity cardEntity;
+
   private List<ItemEntity> items = new ArrayList<>();
 
-  @OneToOne(mappedBy = "orderEntity")
   private AuthorizationEntity authorizationEntity;
 
   public UUID getId() {
@@ -158,18 +158,101 @@ public class OrderEntity {
     return this;
   }
 
+  public UUID getCustomerId() {
+    return customerId;
+  }
+
+  public OrderEntity setCustomerId(UUID customerId) {
+    this.customerId = customerId;
+    return this;
+  }
+
+  public UUID getAddressId() {
+    return addressId;
+  }
+
+  public OrderEntity setAddressId(UUID addressId) {
+    this.addressId = addressId;
+    return this;
+  }
+
+  public UUID getCardId() {
+    return cardId;
+  }
+
+  public OrderEntity setCardId(UUID cardId) {
+    this.cardId = cardId;
+    return this;
+  }
+
+  public UUID getPaymentId() {
+    return paymentId;
+  }
+
+  public OrderEntity setPaymentId(UUID paymentId) {
+    this.paymentId = paymentId;
+    return this;
+  }
+
+  public UUID getShipmentId() {
+    return shipmentId;
+  }
+
+  public OrderEntity setShipmentId(UUID shipmentId) {
+    this.shipmentId = shipmentId;
+    return this;
+  }
+
+  public UUID getCartId() {
+    return cartId;
+  }
+
+  public OrderEntity setCartId(UUID cartId) {
+    this.cartId = cartId;
+    return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    OrderEntity entity = (OrderEntity) o;
+    return Objects.equals(id, entity.id) && Objects
+        .equals(customerId, entity.customerId) && Objects
+        .equals(addressId, entity.addressId) && Objects.equals(cardId, entity.cardId)
+        && Objects.equals(orderDate, entity.orderDate) && Objects
+        .equals(total, entity.total) && Objects.equals(paymentId, entity.paymentId)
+        && Objects.equals(shipmentId, entity.shipmentId) && status == entity.status;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects
+        .hash(id, customerId, addressId, cardId, orderDate, total, paymentId, shipmentId, status);
+  }
+
   @Override
   public String toString() {
     return "OrderEntity{" +
         "id=" + id +
+        ", customerId=" + customerId +
+        ", addressId=" + addressId +
+        ", cardId=" + cardId +
+        ", orderDate=" + orderDate +
         ", total=" + total +
+        ", paymentId=" + paymentId +
+        ", shipmentId=" + shipmentId +
         ", status=" + status +
+        ", cartId=" + cartId +
         ", userEntity=" + userEntity +
         ", addressEntity=" + addressEntity +
         ", paymentEntity=" + paymentEntity +
         ", shipment=" + shipment +
         ", cardEntity=" + cardEntity +
-        ", orderDate=" + orderDate +
         ", items=" + items +
         ", authorizationEntity=" + authorizationEntity +
         '}';

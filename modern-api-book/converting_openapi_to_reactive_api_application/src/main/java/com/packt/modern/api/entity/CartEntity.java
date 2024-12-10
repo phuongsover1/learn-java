@@ -1,30 +1,23 @@
 package com.packt.modern.api.entity;
 
-import jakarta.persistence.*;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Entity
-@Table(name = "cart")
+@Table(name = "ecomm.cart")
 public class CartEntity {
   @Id
-  @GeneratedValue
-  @Column(name = "ID", updatable = false, nullable = false)
+  @Column("id")
   private UUID id;
 
-  @OneToOne
-  @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
   private UserEntity user;
 
-  @ManyToMany(cascade = CascadeType.ALL)
-  @JoinTable(
-      name = "CART_ITEM",
-      joinColumns = @JoinColumn(name = "CART_ID"),
-      inverseJoinColumns = @JoinColumn(name = "ITEM_ID")
-  )
   private List<ItemEntity> items = new ArrayList<>();
 
   public UUID getId() {

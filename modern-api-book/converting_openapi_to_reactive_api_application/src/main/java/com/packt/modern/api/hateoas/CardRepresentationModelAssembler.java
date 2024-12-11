@@ -29,6 +29,7 @@ public class CardRepresentationModelAssembler implements
 
   /**
    * Converts card entity to resource
+   * 
    * @param entity
    * @param exchange
    * @return
@@ -38,28 +39,28 @@ public class CardRepresentationModelAssembler implements
     return Mono.just(entityToModel(entity, exchange));
   }
 
-  private Card entityToModel(CardEntity entity, ServerWebExchange exchange) {
+  public Card entityToModel(CardEntity entity, ServerWebExchange exchange) {
     Card resource = new Card();
     if (Objects.isNull(entity)) {
       return resource;
     }
 
     BeanUtils.copyProperties(entity, resource);
-    resource.setId(Objects.nonNull(entity.getId()) ? entity.getId().toString() :  "");
+    resource.setId(Objects.nonNull(entity.getId()) ? entity.getId().toString() : "");
     resource.setCardNumber(entity.getNumber());
-    resource.setUserId(Objects.nonNull(entity.getUser()) ?  entity.getUser().getId().toString() :  "");
+    resource.setUserId(Objects.nonNull(entity.getUser()) ? entity.getUser().getId().toString() : "");
     String serverUri = getServerUri(exchange);
 
     resource.add(Link.of(String.format("%s/api/v1/cards", serverUri)).withRel("cards"));
     resource.add(
-        Link.of(String.format("%s/api/v1/cards/%s", serverUri, entity.getId())).withRel("self")
-    );
+        Link.of(String.format("%s/api/v1/cards/%s", serverUri, entity.getId())).withRel("self"));
 
     return resource;
   }
 
   /**
    * Converts List of card entity to list of resource
+   * 
    * @param entities
    * @param exchange
    * @return list of card resource

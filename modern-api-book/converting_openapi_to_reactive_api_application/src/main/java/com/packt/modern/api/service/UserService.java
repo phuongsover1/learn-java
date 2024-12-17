@@ -4,13 +4,16 @@ import com.packt.modern.api.entity.AddressEntity;
 import com.packt.modern.api.entity.CardEntity;
 import com.packt.modern.api.entity.UserEntity;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.util.Optional;
 
 public interface UserService {
-  void deleteCustomerById(String id);
-  Optional<Iterable<AddressEntity>> getAddressesByCustomerId(String id);
-  Iterable<UserEntity> getAllCustomers();
-  Optional<CardEntity> getCardByCustomerId(String id);
-  Optional<UserEntity> getCustomerById(String id);
+  Mono<Void> deleteCustomerById(String id);
+  Flux<AddressEntity> getAddressesByCustomerId(String id);
+  Flux<UserEntity> getAllCustomers();
+  Mono<CardEntity> getCardByCustomerId(String id);
+  Mono<UserEntity> getCustomerById(String id);
 
 }

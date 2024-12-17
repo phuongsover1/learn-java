@@ -23,9 +23,10 @@ public class CardEntity {
   @Column("cvv")
   private String cvv;
 
-  private UserEntity user;
+  @Column("user_id")
+  private UUID userId;
 
-  private List<OrderEntity> orders;
+
 
   public UUID getId() {
     return id;
@@ -63,21 +64,14 @@ public class CardEntity {
     return this;
   }
 
-  public UserEntity getUser() {
-    return user;
+  public UUID getUserId() {
+    return userId;
   }
 
-  public CardEntity setUser(UserEntity user) {
-    this.user = user;
+  public CardEntity setUserId(UUID userId) {
+    this.userId = userId;
     return this;
   }
 
-  public List<OrderEntity> getOrderEntity() {
-    return orders;
-  }
 
-  public CardEntity setOrderEntity(List<OrderEntity> orders) {
-    this.orders = orders;
-    return this;
-  }
 }

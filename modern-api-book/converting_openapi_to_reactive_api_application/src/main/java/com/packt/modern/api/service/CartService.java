@@ -3,15 +3,15 @@ package com.packt.modern.api.service;
 import com.packt.modern.api.model.Item;
 import com.packt.modern.api.entity.CartEntity;
 import jakarta.validation.Valid;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 public interface CartService {
-  List<Item> addCartItemsByCustomerId(String customerId, @Valid Item item);
-  List<Item> addOrReplaceItemsByCustomerId(String customerId, @Valid Item item);
-  void deleteCart(String customerId);
-  void deleteItemFromCart(String customerId, String itemId);
-  CartEntity getCartByCustomerId(String customerId);
-  List<Item> getCartItemsByCustomerId(String customerId);
-  Item getCartItemsByItemId(String customerId, String itemId);
+  Flux<Item> addCartItemsByCustomerId(CartEntity cartEntity, @Valid Mono<Item> item);
+  Flux<Item> addOrReplaceItemsByCustomerId(CartEntity customerId, @Valid Mono<Item> item);
+  Mono<Void> deleteCart(String customerId, String cartId);
+  Mono<Void> deleteItemFromCart(CartEntity cartEntity, String itemId);
+  Mono<CartEntity> getCartByCustomerId(String customerId);
 }

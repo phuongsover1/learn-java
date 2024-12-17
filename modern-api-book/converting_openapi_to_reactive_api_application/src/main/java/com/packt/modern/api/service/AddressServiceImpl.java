@@ -1,15 +1,16 @@
 package com.packt.modern.api.service;
 
-import com.packt.modern.api.model.AddAddressReq;
 import com.packt.modern.api.entity.AddressEntity;
+import com.packt.modern.api.model.AddAddressReq;
 import com.packt.modern.api.repository.AddressRepository;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class AddressServiceImpl implements  AddressService{
+public class AddressServiceImpl implements AddressService {
   private final AddressRepository addressRepository;
 
   public AddressServiceImpl(AddressRepository addressRepository) {
@@ -17,22 +18,22 @@ public class AddressServiceImpl implements  AddressService{
   }
 
   @Override
-  public Optional<AddressEntity> createAddress(AddAddressReq addAddressReq) {
-    return Optional.of(addressRepository.save(toEntity(addAddressReq)));
+  public Mono<AddressEntity> createAddress(Mono<AddAddressReq> addAddressReq) {
+    return addAddressReq.map(this::toEntity).flatMap(addressRepository::save);
   }
 
   @Override
   public void deleteAddressById(String id) {
-      addressRepository.deleteById(UUID.fromString(id));
+    addressRepository.deleteById(UUID.fromString(id));
   }
 
   @Override
-  public Optional<AddressEntity> getAddressById(String id) {
+  public Mono<AddressEntity> getAddressById(String id) {
     return addressRepository.findById(UUID.fromString(id));
   }
 
   @Override
-  public Iterable<AddressEntity> getAllAddresses() {
+  public Flux<AddressEntity> getAllAddresses() {
     return addressRepository.findAll();
   }
 

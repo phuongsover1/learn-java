@@ -48,7 +48,7 @@ public class CardRepresentationModelAssembler implements
     BeanUtils.copyProperties(entity, resource);
     resource.setId(Objects.nonNull(entity.getId()) ? entity.getId().toString() : "");
     resource.setCardNumber(entity.getNumber());
-    resource.setUserId(Objects.nonNull(entity.getUser()) ? entity.getUser().getId().toString() : "");
+    resource.setUserId(Objects.nonNull(entity.getUserId()) ? entity.getUserId().toString() : "");
     String serverUri = getServerUri(exchange);
 
     resource.add(Link.of(String.format("%s/api/v1/cards", serverUri)).withRel("cards"));

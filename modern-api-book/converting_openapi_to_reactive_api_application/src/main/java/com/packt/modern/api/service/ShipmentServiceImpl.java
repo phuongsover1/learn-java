@@ -1,14 +1,15 @@
 package com.packt.modern.api.service;
 
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
 import com.packt.modern.api.entity.OrderEntity;
 import com.packt.modern.api.entity.ShipmentEntity;
 import com.packt.modern.api.repository.OrderRepository;
 import com.packt.modern.api.repository.ShipmentRepository;
-import jakarta.validation.constraints.Min;
-import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.UUID;
+import reactor.core.publisher.Mono;
 
 @Service
 public class ShipmentServiceImpl implements ShipmentService {
@@ -21,7 +22,7 @@ public class ShipmentServiceImpl implements ShipmentService {
   }
 
   @Override
-  public Optional<ShipmentEntity> getShipmentByOrderId(
+  public Mono<ShipmentEntity> getShipmentByOrderId(
       String id) {
     return oRepo.findById(UUID.fromString(id)).map(OrderEntity::getShipments);
   }

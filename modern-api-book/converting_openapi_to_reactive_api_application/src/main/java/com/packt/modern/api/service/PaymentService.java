@@ -4,11 +4,10 @@ import com.packt.modern.api.entity.AuthorizationEntity;
 import com.packt.modern.api.model.PaymentReq;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 public interface PaymentService {
 
-  Optional<AuthorizationEntity> authorize(@Valid PaymentReq paymentReq);
-  Optional<AuthorizationEntity> getOrdersPaymentAuthorization(@NotNull String orderId);
+  Mono<AuthorizationEntity> authorize(@Valid PaymentReq paymentReq);
+  Mono<AuthorizationEntity> getOrdersPaymentAuthorization(@NotNull String orderId);
 }

@@ -50,7 +50,7 @@ public class CartRepresentationModelAssembler implements
 
   private List<Item> itemFromEntitities(List<ItemEntity> items) {
     return items.stream().map(
-            i -> new Item().id(i.getProduct().getId().toString())
+            i -> new Item().id(i.getProductId().toString())
                 .unitPrice(i.getPrice())
                 .quantity(i.getQuantity())
         )

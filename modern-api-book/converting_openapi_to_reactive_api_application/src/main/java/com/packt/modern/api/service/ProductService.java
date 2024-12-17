@@ -1,16 +1,16 @@
 package com.packt.modern.api.service;
 
 import com.packt.modern.api.entity.ProductEntity;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.validation.annotation.Validated;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.Optional;
+import org.springframework.validation.annotation.Validated;
 
 @Validated
 public interface ProductService {
   @NotNull
-  Iterable<ProductEntity> getAllProducts();
+  Flux<ProductEntity> getAllProducts();
 
-  Optional<ProductEntity> getProduct(String id);
+  Mono<ProductEntity> getProduct(String id);
 }

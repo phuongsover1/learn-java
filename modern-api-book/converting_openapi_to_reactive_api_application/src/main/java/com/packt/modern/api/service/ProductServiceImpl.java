@@ -1,11 +1,14 @@
 package com.packt.modern.api.service;
 
-import com.packt.modern.api.entity.ProductEntity;
-import com.packt.modern.api.repository.ProductRepository;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.UUID;
+import com.packt.modern.api.entity.ProductEntity;
+import com.packt.modern.api.repository.ProductRepository;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -16,12 +19,12 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public Iterable<ProductEntity> getAllProducts() {
+  public Flux<ProductEntity> getAllProducts() {
     return pRepo.findAll();
   }
 
   @Override
-  public Optional<ProductEntity> getProduct(String id) {
+  public Mono<ProductEntity> getProduct(String id) {
     return pRepo.findById(UUID.fromString(id));
   }
 }

@@ -17,7 +17,7 @@ public class PaymentController implements PaymentApi {
   private final PaymentService pService;
   private final PaymentRepresentationModelAssembler assembler;
 
-  public PaymentController(PaymentService pService, PaymentRepresentationAssembler assembler) {
+  public PaymentController(PaymentService pService, PaymentRepresentationModelAssembler assembler) {
     this.pService = pService;
     this.assembler = assembler;
   }

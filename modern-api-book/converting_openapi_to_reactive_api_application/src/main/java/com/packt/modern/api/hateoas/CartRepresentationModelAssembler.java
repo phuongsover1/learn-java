@@ -34,7 +34,7 @@ public class CartRepresentationModelAssembler implements
     return Mono.just(entityToModel(entity, exchange));
   }
 
-  private Cart entityToModel(CartEntity entity, ServerWebExchange exchange) {
+  public Cart entityToModel(CartEntity entity, ServerWebExchange exchange) {
     Cart resource = new Cart();
     if (Objects.isNull(entity)) {
       return resource;
@@ -48,7 +48,7 @@ public class CartRepresentationModelAssembler implements
     return resource;
   }
 
-  private List<Item> itemFromEntitities(List<ItemEntity> items) {
+  public List<Item> itemFromEntitities(List<ItemEntity> items) {
     return items.stream().map(
             i -> new Item().id(i.getProductId().toString())
                 .unitPrice(i.getPrice())

@@ -1,17 +1,25 @@
 package com.packt.modern.api.controllers;
 
-import com.packt.modern.api.AddressApi;
-import com.packt.modern.api.model.AddAddressReq;
-import com.packt.modern.api.model.Address;
-import com.packt.modern.api.service.AddressService;
-import jakarta.validation.Valid;
+import static org.springframework.http.ResponseEntity.accepted;
+import static org.springframework.http.ResponseEntity.notFound;
+import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.status;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
 
-import java.util.List;
+import com.packt.modern.api.AddressApi;
+import com.packt.modern.api.hateoas.AddressRepresentationModelAssembler;
+import com.packt.modern.api.model.AddAddressReq;
+import com.packt.modern.api.model.Address;
+import com.packt.modern.api.service.AddressService;
 
-import static org.springframework.http.ResponseEntity.*;
+import jakarta.validation.Valid;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 public class AddressController implements AddressApi {
@@ -24,24 +32,26 @@ public class AddressController implements AddressApi {
     this.assembler = assembler;
   }
 
-  public ResponseEntity<Address> createAddress(@Valid AddAddressReq addAddressReq) {
-    return status(HttpStatus.CREATED).body(addressService.createAddress(addAddressReq).map(assembler::toModel).get());
+  public Mono<ResponseEntity<Address>> createAddress(@Valid Mono<AddAddressReq> addAddressReq, ServerWebExchange exchange) {
+    return addressService.createAddress(addAddressReq.cache())
+    .map(add -> status(HttpStatus.CREATED).body(assembler.entityToModel(add, exchange)));
   }
 
   @Override
-  public ResponseEntity<Address> getAddressesById(String id) {
-    return addressService.getAddressById(id).map(assembler::toModel)
-        .map(ResponseEntity::ok).orElse(notFound().build());
+  public Mono<ResponseEntity<Address>> getAddressesById(String id, ServerWebExchange exchange) {
+    return addressService.getAddressById(id)
+    .map(add -> ok(assembler.entityToModel(add, exchange)))
+    .defaultIfEmpty(notFound().build());
   }
 
   @Override
-  public ResponseEntity<List<Address>> getAllAddresses() {
-      return ok(assembler.toModelList(addressService.getAllAddresses()));
+  public Mono<ResponseEntity<Flux<Address>>> getAllAddresses(ServerWebExchange exchange) {
+    return Mono.just(ok(assembler.toListModel(addressService.getAllAddresses(), exchange)));
   }
 
   @Override
-  public ResponseEntity<Void> deleteAddressesById(String id) {
-    addressService.deleteAddressById(id);
-    return accepted().build();
+  public Mono<ResponseEntity<Void>> deleteAddressesById(String id, ServerWebExchange exchange) {
+    addressService.deleteAddressById(id).subscribeOn(Schedulers.boundedElastic());
+    return Mono.just(accepted().build());
   }
 }

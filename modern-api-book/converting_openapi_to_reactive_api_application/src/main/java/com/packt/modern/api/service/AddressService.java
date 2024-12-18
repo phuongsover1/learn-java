@@ -11,7 +11,7 @@ import com.packt.modern.api.entity.AddressEntity;
 public interface AddressService {
   Mono<AddressEntity> createAddress(Mono<AddAddressReq> addAddressReq);
 
-  void deleteAddressById(String id);
+  Mono<Void> deleteAddressById(String id);
 
   Mono<AddressEntity> getAddressById(String id);
 

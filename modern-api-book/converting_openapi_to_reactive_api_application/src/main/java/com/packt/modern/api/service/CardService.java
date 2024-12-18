@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 
 
 public interface CardService {
-  void deleteCardById(String id);
+  Mono<Void> deleteCardById(String id);
   Flux<CardEntity> getAllCards();
   Mono<CardEntity> getCardById(String id);
   Mono<CardEntity> registerCard(@Valid Mono<AddCardReq> addCardReq);

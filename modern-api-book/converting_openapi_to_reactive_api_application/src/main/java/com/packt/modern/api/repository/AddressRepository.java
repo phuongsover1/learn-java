@@ -1,10 +1,10 @@
 package com.packt.modern.api.repository;
 
-import com.packt.modern.api.entity.AddressEntity;
-import org.springframework.data.repository.CrudRepository;
+import java.util.UUID;
+
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
-import java.util.UUID;
+import com.packt.modern.api.entity.AddressEntity;
 
 public interface AddressRepository extends ReactiveCrudRepository<AddressEntity, UUID> {
 }

@@ -23,8 +23,8 @@ public class AddressServiceImpl implements AddressService {
   }
 
   @Override
-  public void deleteAddressById(String id) {
-    addressRepository.deleteById(UUID.fromString(id));
+  public Mono<Void> deleteAddressById(String id) {
+    return addressRepository.deleteById(UUID.fromString(id));
   }
 
   @Override

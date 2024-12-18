@@ -20,6 +20,7 @@ import com.packt.modern.api.repository.ItemRepository;
 import com.packt.modern.api.repository.OrderRepository;
 import com.packt.modern.api.repository.UserRepository;
 
+import jakarta.validation.Valid;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -102,6 +103,11 @@ public OrderServiceImpl(OrderRepository oRepo, UserRepository uRepo, AddressRepo
   @Override
   public Mono<ShipmentEntity> getShipmentByOrderId(String id) {
     return Mono.empty();
+  }
+
+  @Override
+  public Mono<OrderEntity> updateMapping(@Valid OrderEntity orderEntity) {
+    return oRepo.updateMapping(orderEntity);
   }
 
 }

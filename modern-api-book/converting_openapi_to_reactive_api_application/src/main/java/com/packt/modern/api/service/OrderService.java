@@ -15,4 +15,5 @@ public interface OrderService {
   Flux<OrderEntity> getOrdersByCustomerId(@NotNull @Valid String customerId);
   Mono<OrderEntity> getByOrderId(@NotNull String id);
   Mono<ShipmentEntity> getShipmentByOrderId(@NotNull String id);
+  Mono<OrderEntity> updateMapping(@Valid OrderEntity orderEntity);
 }

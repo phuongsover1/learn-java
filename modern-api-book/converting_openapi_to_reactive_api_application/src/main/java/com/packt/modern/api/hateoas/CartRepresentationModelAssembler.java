@@ -4,6 +4,8 @@ import com.packt.modern.api.entity.CartEntity;
 import com.packt.modern.api.entity.ItemEntity;
 import com.packt.modern.api.model.Cart;
 import com.packt.modern.api.model.Item;
+import com.packt.modern.api.service.ItemService;
+
 import jakarta.annotation.Nullable;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.hateoas.Link;
@@ -21,6 +23,11 @@ public class CartRepresentationModelAssembler implements
     ReactiveRepresentationModelAssembler<CartEntity, Cart>, HateoasSupport {
 
   private static String serverUri = null;
+  private final ItemService iService;
+
+  public CartRepresentationModelAssembler(ItemService iService) {
+    this.iService = iService;
+  }
 
   private String getServerUri(@Nullable ServerWebExchange exchange) {
     if (Strings.isBlank(serverUri)) {
@@ -50,10 +57,7 @@ public class CartRepresentationModelAssembler implements
 
   public List<Item> itemFromEntitities(List<ItemEntity> items) {
     return items.stream().map(
-            i -> new Item().id(i.getProductId().toString())
-                .unitPrice(i.getPrice())
-                .quantity(i.getQuantity())
-        )
+        iService::toModel)
         .toList();
   }
 

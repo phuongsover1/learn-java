@@ -3,6 +3,7 @@ package com.packt.modern.api.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -52,7 +53,9 @@ public class ItemServiceImpl implements ItemService {
   @Override
   public Item toModel(ItemEntity e) {
       Item item = new Item();
-      BeanUtils.copyProperties(e, item);
+      item.setId(e.getProductId().toString());
+      item.setQuantity(e.getQuantity());
+      item.setUnitPrice(e.getPrice());
       return item;
   }
 
@@ -74,6 +77,9 @@ public class ItemServiceImpl implements ItemService {
   public ItemEntity toEntity(Item source) {
       ItemEntity item  =  new ItemEntity();
       BeanUtils.copyProperties(source, item);
+      item.setId(null);
+      item.setProductId(UUID.fromString(source.getId()));
+      item.setPrice(source.getUnitPrice());
       return item;
   }
 

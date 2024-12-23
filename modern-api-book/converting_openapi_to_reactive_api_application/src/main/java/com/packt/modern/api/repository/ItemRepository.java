@@ -16,8 +16,8 @@ public interface ItemRepository extends ReactiveCrudRepository<ItemEntity, UUID>
   @Query(value = "delete from ecomm.cart_item where item_id in (:ids) and cart_id = :cartId")
   Mono<Void> deleteCartitemJoinByid(List<UUID> ids, UUID cartId);
 
-  @Query("delete from ecomm.cart_item where id in (:ids)")
-  Mono<Void> deleteByIds(List<UUID> id);
+  @Query("delete from ecomm.item where id in (:ids)")
+  Mono<Void> deleteByIds(List<UUID> ids);
 
   @Query("insert into ecomm.cart_item(cart_id, item_id) values(:cartId, :itemId)")
   Mono<Void> saveMapping(UUID cartId, UUID itemId);

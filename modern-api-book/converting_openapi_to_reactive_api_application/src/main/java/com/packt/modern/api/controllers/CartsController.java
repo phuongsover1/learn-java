@@ -53,7 +53,7 @@ public class CartsController implements CartApi {
   public Mono<ResponseEntity<Flux<Item>>> addOrReplaceItemsByCustomerId(String customerId, Mono<Item> item,
       ServerWebExchange exchange) {
     return cService.getCartByCustomerId(customerId)
-        .map(c -> cService.addOrReplaceItemsByCustomerId(c, item))
+        .map(c -> cService.addOrReplaceItemsByCustomerId(c, item.cache()))
         .map(ResponseEntity::ok)
         .switchIfEmpty(Mono.just(notFound().build()));
   }

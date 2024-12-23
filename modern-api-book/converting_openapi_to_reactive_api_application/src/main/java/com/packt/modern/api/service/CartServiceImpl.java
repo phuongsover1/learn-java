@@ -18,11 +18,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -77,9 +81,9 @@ public class CartServiceImpl implements CartService {
     return newItem.flatMap(ni -> {
       List<ItemEntity> existing = cartItems.stream().filter(i -> i.getProductId().equals(UUID.fromString(ni.getId()))).toList();
       if (existing.size() == 1) {
-        existing.get(0).setPrice(ni.getUnitPrice()).setQuantity(ni.getQuantity());
-        return iRepo.save(existing.get(0)).flatMap(i -> getUpdatedList(cartItems.stream().filter(j -> !j.getProductId().equals(UUID.fromString(ni.getId())))
-            .toList(), i));
+        existing.get(0).setQuantity(ni.getQuantity()).setPrice(ni.getUnitPrice());
+        return iRepo.save(existing.get(0)).flatMap(i -> getUpdatedList(new ArrayList<>(cartItems.stream().filter(j -> !j.getProductId().equals(UUID.fromString(ni.getId())))
+            .toList()), i)); // because toList() return immutable list -> cartItems.add() in getUpdatedList() ->  error 
       }
 
       return iRepo.save(iService.toEntity(ni)).flatMap(i -> iRepo.saveMapping(cartEntity.getId(), i.getId()).then(
@@ -107,13 +111,13 @@ public class CartServiceImpl implements CartService {
 
 
   @Override
-  public Mono<Void> deleteItemFromCart(CartEntity cartEntity, String itemId) {
+  public Mono<Void> deleteItemFromCart(CartEntity cartEntity, String productId) {
      List<ItemEntity> items = cartEntity.getItems(); 
      items = items.stream()
-     .filter(i -> i.getId().equals(UUID.fromString(itemId))).toList();
+     .filter(i -> i.getProductId().equals(UUID.fromString(productId))).toList();
      if (items.size() != 1) {
       return Mono.error(new ResourceNotFoundException(
-        ". No items found in Cart with Id - " + itemId
+        ". No items found in Cart with Id - " + productId
       ));
      }
      List<UUID> ids = items.stream().map(i -> i.getId()).toList();

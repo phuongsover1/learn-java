@@ -445,6 +445,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Address'
+  /api/v1/customers/{customerId}/addresses/{addressId}:
+    delete:
+      tags:
+        - customer
+      summary: Delete address of customer
+      description: Delete customer's address based on given customer ID and address ID
+      operationId: deleteAddressOfCustomer
+      parameters:
+        - name: customerId
+          in: path
+          description: Customer Identifier
+          required: true
+          schema:
+            type: string
+        - name: addressId
+          in: path
+          description: Address Identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        202:
+          description: Accepts the deletion request and perform deletion
+          content: {}
+        404:
+          description: Given customer ID or address ID doesn't exist
+          content: {}
+      
   /api/v1/addresses:
     get:
       tags:

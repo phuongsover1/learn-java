@@ -26,7 +26,9 @@ public enum ErrorCode {
   ILLEGAL_ARGUMENT_EXCEPTION("PACKT-0014", "Invalid data passed."),
   CONSTRAINT_VIOLATION("PACKT-0015", "Validation failed."),
   CARD_ALREADY_EXISTS("PACKT-0016", "Card already exists"),
-  GENERIC_STATUS_ERROR("PACKT-0017", "Status error." );
+  GENERIC_STATUS_ERROR("PACKT-0017", "Status error." ),
+  ADDRESS_NOT_FOUND("PACKT-0018", "Requested address not found"),
+  USER_NOT_IN_ADDRESS("PACKT-0019", "User not in address");
 
 
   private final String errCode;

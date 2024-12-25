@@ -68,6 +68,12 @@ dependencies {
     // Flyway: End
 }
 
+test {
+    useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
+    }
+}
 bootJar {
     manifest {
         attributes 'Implementation-Version': "${version}"

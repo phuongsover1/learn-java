@@ -11,7 +11,7 @@ public class UserAddressEntity {
   private UUID userId;
 
   @Column("address_id")
-  private String addressId;
+  private UUID addressId;
 
   public UUID getUserId() {
     return userId;
@@ -22,11 +22,11 @@ public class UserAddressEntity {
     return this;
   }
 
-  public String getAddressId() {
+  public UUID getAddressId() {
     return addressId;
   }
 
-  public UserAddressEntity setAddressId(String addressId) {
+  public UserAddressEntity setAddressId(UUID addressId) {
     this.addressId = addressId;
     return this;
   }

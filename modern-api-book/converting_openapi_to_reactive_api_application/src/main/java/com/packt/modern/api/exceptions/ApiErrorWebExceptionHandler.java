@@ -1,5 +1,8 @@
 package com.packt.modern.api.exceptions;
 
+import static com.packt.modern.api.exceptions.ErrorCode.*;
+
+import java.util.Map;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
@@ -12,19 +15,21 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.server.*;
+import org.springframework.web.reactive.function.server.RequestPredicates;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.RouterFunctions;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
-
-import static com.packt.modern.api.exceptions.ErrorCode.*;
 
 @Component
 @Order(-2)
 public class ApiErrorWebExceptionHandler extends AbstractErrorWebExceptionHandler {
-  public ApiErrorWebExceptionHandler(ErrorAttributes errorAttributes, ApplicationContext applicationContext,
-                                     ServerCodecConfigurer serverCodecConfigurer) {
+  public ApiErrorWebExceptionHandler(
+      ErrorAttributes errorAttributes,
+      ApplicationContext applicationContext,
+      ServerCodecConfigurer serverCodecConfigurer) {
     super(errorAttributes, new WebProperties().getResources(), applicationContext);
     super.setMessageWriters(serverCodecConfigurer.getWriters());
     super.setMessageReaders(serverCodecConfigurer.getReaders());
@@ -32,22 +37,26 @@ public class ApiErrorWebExceptionHandler extends AbstractErrorWebExceptionHandle
 
   @Override
   protected RouterFunction<ServerResponse> getRoutingFunction(ErrorAttributes errorAttributes) {
-    return RouterFunctions.route(
-        RequestPredicates.all(), this::renderErrorResponse
-    );
+    return RouterFunctions.route(RequestPredicates.all(), this::renderErrorResponse);
   }
 
   private Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
-    Map<String, Object> errorPropertiesMap = getErrorAttributes(request,
-        ErrorAttributeOptions.defaults());
-    Throwable throwable = (Throwable) request
-        .attribute("org.springframework.boot.web.reactive.error.DefaultErrorAttributes.ERROR")
-        .orElseThrow(() -> new IllegalStateException("Missing exception attribute in ServerWebExchange"));
+    Map<String, Object> errorPropertiesMap =
+        getErrorAttributes(request, ErrorAttributeOptions.defaults());
+    Throwable throwable =
+        (Throwable)
+            request
+                .attribute(
+                    "org.springframework.boot.web.reactive.error.DefaultErrorAttributes.ERROR")
+                .orElseThrow(
+                    () ->
+                        new IllegalStateException(
+                            "Missing exception attribute in ServerWebExchange"));
     throwable.printStackTrace();
     ErrorCode errorCode = GENERIC_ERROR;
     if (throwable instanceof IllegalArgumentException
-     || throwable instanceof DataIntegrityViolationException
-     || throwable instanceof ServerWebInputException) {
+        || throwable instanceof DataIntegrityViolationException
+        || throwable instanceof ServerWebInputException) {
       errorCode = ILLEGAL_ARGUMENT_EXCEPTION;
     } else if (throwable instanceof CustomerNotFoundException) {
       errorCode = CUSTOMER_NOT_FOUND;
@@ -55,19 +64,25 @@ public class ApiErrorWebExceptionHandler extends AbstractErrorWebExceptionHandle
       errorCode = RESOURCE_NOT_FOUND;
     } else if (throwable instanceof CardAlreadyExsits) {
       errorCode = CARD_ALREADY_EXISTS;
-    } else if (throwable instanceof GenericAlreadyExistsException){
+    } else if (throwable instanceof UserNotInAdress) {
+      errorCode = USER_NOT_IN_ADDRESS;
+    } else if (throwable instanceof GenericAlreadyExistsException) {
       errorCode = GENERIC_ALREADY_EXISTS;
+    } else if (throwable instanceof AddressNotFoundException) {
+      errorCode = ADDRESS_NOT_FOUND;
     } else if (throwable instanceof org.springframework.web.server.ResponseStatusException) {
       errorCode = GENERIC_STATUS_ERROR;
     }
 
-    switch(errorCode)  {
+    switch (errorCode) {
       case ILLEGAL_ARGUMENT_EXCEPTION -> {
         errorPropertiesMap.put("status", HttpStatus.BAD_REQUEST);
         errorPropertiesMap.put("code", ILLEGAL_ARGUMENT_EXCEPTION.getErrCode());
         errorPropertiesMap.put("error", ILLEGAL_ARGUMENT_EXCEPTION);
-        errorPropertiesMap.put("message", String.format("%s %s", ILLEGAL_ARGUMENT_EXCEPTION.getErrMsgKey(),
-            throwable.getMessage()));
+        errorPropertiesMap.put(
+            "message",
+            String.format(
+                "%s %s", ILLEGAL_ARGUMENT_EXCEPTION.getErrMsgKey(), throwable.getMessage()));
         return ServerResponse.status(HttpStatus.BAD_REQUEST)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(errorPropertiesMap));
@@ -76,8 +91,7 @@ public class ApiErrorWebExceptionHandler extends AbstractErrorWebExceptionHandle
         errorPropertiesMap.put("status", HttpStatus.NOT_FOUND);
         errorPropertiesMap.put("code", CUSTOMER_NOT_FOUND.getErrCode());
         errorPropertiesMap.put("error", CUSTOMER_NOT_FOUND);
-        errorPropertiesMap.put("message", String.format("%s %s", CUSTOMER_NOT_FOUND.getErrMsgKey(),
-            throwable.getMessage()));
+        errorPropertiesMap.put("message", String.format("%s", CUSTOMER_NOT_FOUND.getErrMsgKey()));
         return ServerResponse.status(HttpStatus.NOT_FOUND)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(errorPropertiesMap));
@@ -86,9 +100,18 @@ public class ApiErrorWebExceptionHandler extends AbstractErrorWebExceptionHandle
         errorPropertiesMap.put("status", HttpStatus.NOT_FOUND);
         errorPropertiesMap.put("code", RESOURCE_NOT_FOUND.getErrCode());
         errorPropertiesMap.put("error", RESOURCE_NOT_FOUND);
-        errorPropertiesMap.put("message", String
-            .format("%s %s", RESOURCE_NOT_FOUND.getErrMsgKey(),
-                throwable.getMessage()));
+        errorPropertiesMap.put(
+            "message",
+            String.format("%s %s", RESOURCE_NOT_FOUND.getErrMsgKey(), throwable.getMessage()));
+        return ServerResponse.status(HttpStatus.NOT_FOUND)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(errorPropertiesMap));
+      }
+      case ADDRESS_NOT_FOUND -> {
+        errorPropertiesMap.put("status", HttpStatus.NOT_FOUND);
+        errorPropertiesMap.put("code", ADDRESS_NOT_FOUND.getErrCode());
+        errorPropertiesMap.put("error", ADDRESS_NOT_FOUND);
+        errorPropertiesMap.put("message", String.format("%s", ADDRESS_NOT_FOUND.getErrMsgKey()));
         return ServerResponse.status(HttpStatus.NOT_FOUND)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(errorPropertiesMap));
@@ -97,20 +120,26 @@ public class ApiErrorWebExceptionHandler extends AbstractErrorWebExceptionHandle
         errorPropertiesMap.put("status", HttpStatus.NOT_ACCEPTABLE);
         errorPropertiesMap.put("code", CARD_ALREADY_EXISTS.getErrCode());
         errorPropertiesMap.put("error", CARD_ALREADY_EXISTS);
-        errorPropertiesMap.put("message", String
-            .format("%s %s", CARD_ALREADY_EXISTS.getErrMsgKey(),
-                throwable.getMessage()));
+        errorPropertiesMap.put(
+            "message",
+            String.format("%s %s", CARD_ALREADY_EXISTS.getErrMsgKey(), throwable.getMessage()));
         return ServerResponse.status(HttpStatus.NOT_ACCEPTABLE)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(errorPropertiesMap));
+      }
+      case USER_NOT_IN_ADDRESS -> {
+        errorPropertiesMap.put("status", HttpStatus.NOT_FOUND);
+        errorPropertiesMap.put("code", USER_NOT_IN_ADDRESS.getErrCode());
+        errorPropertiesMap.put("error", USER_NOT_IN_ADDRESS);
+        errorPropertiesMap.put("message", String.format("%s", USER_NOT_IN_ADDRESS.getErrMsgKey()));
       }
       case GENERIC_ALREADY_EXISTS -> {
         errorPropertiesMap.put("status", HttpStatus.NOT_ACCEPTABLE);
         errorPropertiesMap.put("code", GENERIC_ALREADY_EXISTS.getErrCode());
         errorPropertiesMap.put("error", GENERIC_ALREADY_EXISTS);
-        errorPropertiesMap.put("message", String
-            .format("%s %s", GENERIC_ALREADY_EXISTS.getErrMsgKey(),
-                throwable.getMessage()));
+        errorPropertiesMap.put(
+            "message",
+            String.format("%s %s", GENERIC_ALREADY_EXISTS.getErrMsgKey(), throwable.getMessage()));
         return ServerResponse.status(HttpStatus.NOT_ACCEPTABLE)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(errorPropertiesMap));
@@ -119,19 +148,20 @@ public class ApiErrorWebExceptionHandler extends AbstractErrorWebExceptionHandle
         errorPropertiesMap.put("status", HttpStatus.NOT_FOUND);
         errorPropertiesMap.put("code", GENERIC_STATUS_ERROR.getErrCode());
         errorPropertiesMap.put("error", GENERIC_STATUS_ERROR);
-        errorPropertiesMap.put("message", String
-            .format("%s %s", GENERIC_STATUS_ERROR.getErrMsgKey(),
-                throwable.getMessage()));
+        errorPropertiesMap.put(
+            "message",
+            String.format("%s %s", GENERIC_STATUS_ERROR.getErrMsgKey(), throwable.getMessage()));
         return ServerResponse.status(HttpStatus.NOT_FOUND)
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(errorPropertiesMap));
       }
-      default -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .contentType(MediaType.APPLICATION_JSON)
-          .body(BodyInserters.fromValue(errorPropertiesMap));
+      default ->
+          ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(BodyInserters.fromValue(errorPropertiesMap));
     }
     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
         .contentType(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(errorPropertiesMap));
-    }
   }
+}

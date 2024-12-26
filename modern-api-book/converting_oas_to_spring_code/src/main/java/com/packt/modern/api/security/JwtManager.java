@@ -35,4 +35,5 @@ public class JwtManager {
         .withExpiresAt(new Date(now + EXPIRATION_TIME))
         .sign(Algorithm.RSA256(publicKey, privateKey));
   }
+
 }

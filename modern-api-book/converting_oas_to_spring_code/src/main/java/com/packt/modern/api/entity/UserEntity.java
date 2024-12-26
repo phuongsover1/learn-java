@@ -38,6 +38,8 @@ public class UserEntity {
   @Column(name = "USER_STATUS")
   private String userStatus;
 
+  private RoleEnum role = RoleEnum.USER;
+
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinTable(
       name = "USER_ADDRESS",
@@ -161,6 +163,15 @@ public class UserEntity {
 
   public UserEntity setOrder(List<OrderEntity> order) {
     this.orders = order;
+    return this;
+  }
+
+  public RoleEnum getRole() {
+    return role;
+  }
+
+  public UserEntity setRole(RoleEnum role) {
+    this.role = role;
     return this;
   }
 }

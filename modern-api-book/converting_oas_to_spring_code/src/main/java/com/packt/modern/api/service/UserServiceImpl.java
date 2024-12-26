@@ -3,19 +3,38 @@ package com.packt.modern.api.service;
 import com.packt.modern.api.entity.AddressEntity;
 import com.packt.modern.api.entity.CardEntity;
 import com.packt.modern.api.entity.UserEntity;
+import com.packt.modern.api.entity.UserTokenEntity;
+import com.packt.modern.api.exceptions.GenericAlreadyExistsException;
+import com.packt.modern.api.model.SignedInUser;
+import com.packt.modern.api.model.User;
 import com.packt.modern.api.repository.UserRepository;
+import com.packt.modern.api.repository.UserTokenRepository;
+import com.packt.modern.api.security.JwtManager;
+import jakarta.transaction.Transactional;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
+  private final UserTokenRepository userTokenRepository;
+  private final JwtManager tokenManager;
 
-  public UserServiceImpl(UserRepository userRepository) {
+  public UserServiceImpl(
+      UserRepository userRepository,
+      UserTokenRepository userTokenRepository,
+      JwtManager tokenManager) {
     this.userRepository = userRepository;
+    this.userTokenRepository = userTokenRepository;
+    this.tokenManager = tokenManager;
   }
 
   @Override
@@ -53,5 +72,56 @@ public class UserServiceImpl implements UserService {
     Optional<UserEntity> oUserEntity = userRepository.findByUsername(uname);
     return oUserEntity.orElseThrow(
         () -> new UsernameNotFoundException(String.format("Given user %s not found.", uname)));
+  }
+
+  @Override
+  @Transactional
+  public Optional<SignedInUser> createUser(User user) {
+    Integer count = userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail());
+    if (count > 0) {
+      throw new GenericAlreadyExistsException("Use different username and email.");
+    }
+    UserEntity userEntity = userRepository.save(toEntity(user));
+    return Optional.of(createSignedUserWithRefreshToken(userEntity));
+  }
+
+  private SignedInUser createSignedUserWithRefreshToken(UserEntity userEntity) {
+    return createSignedInUser(userEntity).refreshToken(createRefreshToken(userEntity));
+  }
+
+  private SignedInUser createSignedInUser(UserEntity userEntity) {
+    String token =
+        tokenManager.create(
+            org.springframework.security.core.userdetails.User.builder()
+                .username(userEntity.getUsername())
+                .password(userEntity.getPassword())
+                .authorities(
+                    Objects.nonNull(userEntity.getRole()) ? userEntity.getRole().name() : "")
+                .build());
+    return new SignedInUser()
+        .username(userEntity.getUsername())
+        .accessToken(token)
+        .userId(userEntity.getId().toString());
+  }
+
+  private String createRefreshToken(UserEntity userEntity) {
+    String token = RandomHolder.randomKey(128);
+    userTokenRepository.save(new UserTokenEntity().setRefreshToken(token).setUser(userEntity));
+    return token;
+  }
+
+  private UserEntity toEntity(User user) {
+    UserEntity userEntity = new UserEntity();
+    BeanUtils.copyProperties(user, userEntity);
+    return userEntity;
+  }
+
+  private static class RandomHolder {
+    static final Random random = new SecureRandom();
+
+    public static String randomKey(int length) {
+      return String.format(
+          "%" + length + "s", new BigInteger(length * 5 /*base32, 2^5*/, random).toString(32));
+    }
   }
 }

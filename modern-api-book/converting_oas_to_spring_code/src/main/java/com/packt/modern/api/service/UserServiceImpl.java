@@ -5,6 +5,8 @@ import com.packt.modern.api.entity.CardEntity;
 import com.packt.modern.api.entity.UserEntity;
 import com.packt.modern.api.entity.UserTokenEntity;
 import com.packt.modern.api.exceptions.GenericAlreadyExistsException;
+import com.packt.modern.api.exceptions.InvalidRefreshTokenException;
+import com.packt.modern.api.model.RefreshToken;
 import com.packt.modern.api.model.SignedInUser;
 import com.packt.modern.api.model.User;
 import com.packt.modern.api.repository.UserRepository;
@@ -114,6 +116,35 @@ public class UserServiceImpl implements UserService {
     UserEntity userEntity = new UserEntity();
     BeanUtils.copyProperties(user, userEntity);
     return userEntity;
+  }
+
+  @Override
+  public SignedInUser getSignedInUser(UserEntity userEntity) {
+    userTokenRepository.deleteByUserId(userEntity.getId());
+    return createSignedUserWithRefreshToken(userEntity);
+  }
+
+  // Cứ mỗi lần yêu cầu token bằng request token thì trả về access token mới với refresh token cũ
+  @Override
+  public Optional<SignedInUser> getAccessToken(RefreshToken refToken) {
+    return userTokenRepository
+        .findByRefreshToken(refToken.getRefreshToken())
+        .map(
+            ut ->
+                Optional.of(
+                    createSignedInUser(ut.getUser()).refreshToken(refToken.getRefreshToken())))
+        .orElseThrow(() -> new InvalidRefreshTokenException("Invalid token"));
+  }
+
+  @Override
+  public void removeRefreshToken(RefreshToken refToken) {
+    userTokenRepository
+        .findByRefreshToken(refToken.getRefreshToken())
+        .ifPresentOrElse(
+            userTokenRepository::delete,
+            () -> {
+              throw new InvalidRefreshTokenException("Invalid token");
+            });
   }
 
   private static class RandomHolder {

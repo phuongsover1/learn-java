@@ -1,20 +1,25 @@
 package com.packt.modern.api.exceptions;
 
 public enum ErrorCode {
-  GENERIC_ERROR("PACKT-0001", "The system is unable to complete the request. Contact system support"),
-  HTTP_MEDIATYPE_NOT_SUPPORTED("PACKT-0002", "Requested media type is not supported. Please use application/json or application/xml as 'Content-Type' header value"),
+  GENERIC_ERROR(
+      "PACKT-0001", "The system is unable to complete the request. Contact system support"),
+  HTTP_MEDIATYPE_NOT_SUPPORTED(
+      "PACKT-0002",
+      "Requested media type is not supported. Please use application/json or application/xml as 'Content-Type' header value"),
   HTTP_MESSAGE_NOT_WRITABLE("PACKT-0003", "Missing 'Accept' header. Please add 'Accept' header"),
-  HTTP_MEDIA_TYPE_NOT_ACCEPTABLE("PACKT-0004",
+  HTTP_MEDIA_TYPE_NOT_ACCEPTABLE(
+      "PACKT-0004",
       """
-          Requested 'Accept' header value is not supported. 
+          Requested 'Accept' header value is not supported.
           Please use application/json or application/xml as 'Accept' value
-          """
-  ),
-  JSON_PARSE_ERROR("PACKT-0005",
+          """),
+  JSON_PARSE_ERROR(
+      "PACKT-0005",
       """
           Make sure request payload should be a valid JSON object.
           """),
-  HTTP_MESSAGE_NOT_READABLE("PACKT-0006",
+  HTTP_MESSAGE_NOT_READABLE(
+      "PACKT-0006",
       """
            Make sure request payload should be a valid JSON or XML\s
            object according to 'Content-Type'.
@@ -24,8 +29,10 @@ public enum ErrorCode {
   GENERIC_ALREADY_EXISTS("PACKT-0012", "Already exists"),
   ITEM_NOT_FOUND("PACKT-0013", "Requested item not found"),
   ILLEGAL_ARGUMENT_EXCEPTION("PACKT-0014", "Invalid data passed."),
-  CONSTRAINT_VIOLATION("PACKT-0015", "Validation failed.");
-
+  CONSTRAINT_VIOLATION("PACKT-0015", "Validation failed."),
+  ACCESS_DENIED("PACKT-0016", "Access denied"),
+  UNAUTHORIZED("PACKT-0017", "Unauthorized"),
+  HTTP_REQUEST_METHOD_NOT_SUPPORTED("PACKT-008", "Request method not supported");
 
   private final String errCode;
   private final String errMsgKey;

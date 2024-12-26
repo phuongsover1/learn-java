@@ -1,20 +1,23 @@
 package com.packt.modern.api.exceptions;
 
-import java.io.Serial;
-
-public class ItemNotFoundException extends RuntimeException {
-  @Serial
+public class InvalidRefreshTokenException extends RuntimeException {
   private static final long serialVersionUID = 1L;
   private final String errMsgKey;
   private final String errorCode;
 
-  public ItemNotFoundException(ErrorCode code) {
+  public InvalidRefreshTokenException() {
+    super(ErrorCode.UNAUTHORIZED.getErrMsgKey());
+    this.errMsgKey = ErrorCode.UNAUTHORIZED.getErrMsgKey();
+    this.errorCode = ErrorCode.UNAUTHORIZED.getErrCode();
+  }
+
+  public InvalidRefreshTokenException(ErrorCode code) {
     super(code.getErrMsgKey());
     this.errMsgKey = code.getErrMsgKey();
     this.errorCode = code.getErrCode();
   }
 
-  public ItemNotFoundException(final String message) {
+  public InvalidRefreshTokenException(final String message) {
     super(message);
     this.errMsgKey = ErrorCode.CUSTOMER_NOT_FOUND.getErrMsgKey();
     this.errorCode = ErrorCode.CUSTOMER_NOT_FOUND.getErrCode();

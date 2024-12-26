@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
 @Configuration
 @EnableWebSecurity
@@ -75,5 +77,10 @@ public class Securityconfig {
       LOG.error("key from keystore: {}", keyStorePath, e);
     }
     throw new IllegalArgumentException("Can't load public key");
+  }
+
+  @Bean
+  public JwtDecoder jwtDecoder(RSAPublicKey publicKey) {
+    return NimbusJwtDecoder.withPublicKey(publicKey).build();
   }
 }

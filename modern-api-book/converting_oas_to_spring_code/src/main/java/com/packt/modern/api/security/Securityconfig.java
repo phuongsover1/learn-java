@@ -1,5 +1,9 @@
 package com.packt.modern.api.security;
 
+import static com.packt.modern.api.security.Constants.*;
+import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
+
+import com.packt.modern.api.entity.RoleEnum;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
@@ -12,10 +16,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -81,5 +90,48 @@ public class Securityconfig {
   @Bean
   public JwtDecoder jwtDecoder(RSAPublicKey publicKey) {
     return NimbusJwtDecoder.withPublicKey(publicKey).build();
+  }
+
+  @Bean
+  protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.httpBasic()
+        .disable()
+        .formLogin()
+        .disable()
+        .csrf()
+        .ignoringRequestMatchers(API_URL_PREFIX)
+        .ignoringRequestMatchers(toH2Console())
+        .and()
+        .headers()
+        .frameOptions()
+        .sameOrigin()
+        .and()
+        .cors()
+        .and()
+        .authorizeHttpRequests(
+            req ->
+                req.requestMatchers(toH2Console())
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(TOKEN_URL, HttpMethod.POST.name()))
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(TOKEN_URL, HttpMethod.DELETE.name()))
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(SIGNUP_URL, HttpMethod.POST.name()))
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(REFRESH_URL, HttpMethod.POST.name()))
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(PRODUCTS_URL, HttpMethod.GET.name()))
+                    .permitAll()
+                    .requestMatchers("/api/v1/addresses/**")
+                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
+                    .anyRequest()
+                    .authenticated())
+        .oauth2ResourceServer(
+            oauth2ResourceServer ->
+                oauth2ResourceServer.jwt(
+                    jwt -> jwt.jwtAuthenticationConverter(getJwtAuthenticationConverter())))
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    return http.build();
   }
 }

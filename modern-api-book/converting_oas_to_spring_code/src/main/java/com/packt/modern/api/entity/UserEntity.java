@@ -38,6 +38,8 @@ public class UserEntity {
   @Column(name = "USER_STATUS")
   private String userStatus;
 
+  @Column(name = "ROLE")
+  @Enumerated(EnumType.STRING)
   private RoleEnum role = RoleEnum.USER;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

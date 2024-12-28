@@ -15,7 +15,7 @@ externalDocs:
   description: Any document link you want to generate along with API.
   url: http://swagger.io
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8081
 tags:
   - name: cart
     description: Everything about cart
@@ -34,6 +34,8 @@ tags:
     description: Operations about shippings
   - name: product
     description: Operations about products
+  - name: user
+    description: Operations about signup, signin and so on
 
 
 paths:
@@ -356,7 +358,7 @@ paths:
                   $ref: '#/components/schemas/User'
     post:
       tags:
-        - customer
+        - user
       summary: Signup the a new customer (user)
       description: Creates a new customer (user), who can login and do the shopping.
       operationId: signUp
@@ -381,7 +383,7 @@ paths:
   /api/v1/auth/token:
     post:
       tags:
-        - customer
+        - user
       summary: Signin the customer (user)
       description: Generates the JWT and refresh token
       operationId: signIn
@@ -405,7 +407,7 @@ paths:
                 $ref: '#/components/schemas/SignedInUser'
     delete:
       tags:
-        - customer
+        - user
       summary: Signouts the customer (user)
       description: Signouts the customer (user)
       operationId: signOut
@@ -423,7 +425,7 @@ paths:
   /api/v1/auth/token/refresh:
     post:
       tags:
-        - customer
+        - user
       summary: Provides new JWT based on valid refresh token.
       description: Provides JWT based on valid refresh token.
       operationId: getAccessToken

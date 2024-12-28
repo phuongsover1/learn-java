@@ -1,6 +1,7 @@
 package com.packt.modern.api.controllers;
 
 import com.packt.modern.api.CustomerApi;
+import com.packt.modern.api.UserApi;
 import com.packt.modern.api.entity.UserEntity;
 import com.packt.modern.api.exceptions.InvalidRefreshTokenException;
 import com.packt.modern.api.model.RefreshToken;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.http.ResponseEntity.*;
 
 @RestController
-public class AuthController implements CustomerApi {
+public class AuthController implements UserApi {
   private final UserService uService;
   private final PasswordEncoder passwordEncoder;
 

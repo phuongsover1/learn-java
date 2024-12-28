@@ -79,12 +79,22 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public Optional<SignedInUser> createUser(User user) {
+    checkUsernameAndPassword(user);
     Integer count = userRepository.findByUsernameOrEmail(user.getUsername(), user.getEmail());
     if (count > 0) {
       throw new GenericAlreadyExistsException("Use different username and email.");
     }
     UserEntity userEntity = userRepository.save(toEntity(user));
     return Optional.of(createSignedUserWithRefreshToken(userEntity));
+  }
+
+  private void checkUsernameAndPassword(User user) {
+    if (Strings.isBlank(user.getUsername())) {
+      throw new GenericAlreadyExistsException("Username is empty.");
+    }
+    if (Strings.isBlank(user.getPassword())) {
+      throw new GenericAlreadyExistsException("Password is empty.");
+    }
   }
 
   private SignedInUser createSignedUserWithRefreshToken(UserEntity userEntity) {

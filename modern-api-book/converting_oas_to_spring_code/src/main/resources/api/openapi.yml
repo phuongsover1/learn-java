@@ -431,6 +431,9 @@ paths:
       operationId: getAccessToken
       requestBody:
         content:
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/RefreshToken"
           application/json:
             schema:
               $ref: '#/components/schemas/RefreshToken'
@@ -438,6 +441,9 @@ paths:
         200:
           description: For successful operation.
           content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SignedInUser'
             application/json:
               schema:
                 $ref: '#/components/schemas/SignedInUser'

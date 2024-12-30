@@ -29,15 +29,16 @@ public class OrderServiceImpl implements OrderService {
     if (Strings.isEmpty(newOrder.getCustomerId())) {
       throw new ResourceNotFoundException("Invalid customer id.");
     }
-    if (Objects.isNull(newOrder.getAddress()) || Strings.isEmpty(newOrder.getAddress().getId())) {
-      throw new ResourceNotFoundException("Invalid address id.");
-    }
-    if (Objects.isNull(newOrder.getCard()) || Strings.isEmpty(newOrder.getCard().getId())) {
-      throw new ResourceNotFoundException("Invalid card id.");
-    }
+//    if (Objects.isNull(newOrder.getAddress()) || Strings.isEmpty(newOrder.getAddress().getId())) {
+//      throw new ResourceNotFoundException("Invalid address id.");
+//    }
+//    if (Objects.isNull(newOrder.getCard()) || Strings.isEmpty(newOrder.getCard().getId())) {
+//      throw new ResourceNotFoundException("Invalid card id.");
+//    }
 
     // 1. Save Order
-    return oRepo.insert(newOrder);
+    Optional<OrderEntity> optionalOrder = oRepo.insert(newOrder);
+    return optionalOrder;
     // Ideally, here it will trigger the rest of the process
     // 2. Initiate the payment
     // 3. Once the payment is authorized, change the status to paid

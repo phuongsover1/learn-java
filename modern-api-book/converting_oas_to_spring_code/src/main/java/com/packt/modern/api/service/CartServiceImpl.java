@@ -10,11 +10,15 @@ import com.packt.modern.api.repository.CartRepository;
 import com.packt.modern.api.repository.UserRepository;
 import org.springframework.objenesis.instantiator.util.UnsafeUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -44,19 +48,42 @@ public class CartServiceImpl implements CartService {
   }
 
   @Override
+  @Transactional
   public List<Item> addOrReplaceItemsByCustomerId(String customerId, Item item) {
-    return List.of();
+    CartEntity cart = getCartByCustomerId(customerId);
+    List<ItemEntity> items = Objects.nonNull(cart.getItems()) ? cart.getItems() : List.of();
+    AtomicBoolean itemExists = new AtomicBoolean(false);
+    items.forEach(
+            i -> {
+              if (i.getProduct().getId().equals(UUID.fromString(item.getId()))) {
+                i.setQuantity(item.getQuantity())
+                        .setPrice(item.getUnitPrice());
+                itemExists.set(true);
+              }
+            }
+    );
+    if (!itemExists.get()) {
+      items.add(iService.toEntity(item));
+    }
+    return iService.toModelList(cRepo.save(cart).getItems());
   }
 
   @Override
+  @Transactional
   public void deleteCart(String customerId) {
     CartEntity cartEntity = getCartByCustomerId(customerId);
     cRepo.deleteById(cartEntity.getId());
   }
 
   @Override
+  @Transactional
   public void deleteItemFromCart(String customerId, String itemId) {
-
+    CartEntity cartEntity = getCartByCustomerId(customerId);
+    List<ItemEntity> updatedItems = cartEntity.getItems()
+            .stream().filter(i -> !i.getProduct().getId().equals(UUID.fromString(itemId)))
+            .collect(Collectors.toList());
+   cartEntity.setItems(updatedItems);
+   cRepo.save(cartEntity);
   }
 
   @Override

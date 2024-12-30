@@ -137,7 +137,7 @@ create TABLE IF NOT EXISTS ecomm.shipment (
 create TABLE IF NOT EXISTS ecomm.orders (
     id uuid NOT NULL DEFAULT random_uuid(),
     customer_id uuid NOT NULL,
-    address_id uuid NOT NULL,
+    address_id uuid ,
     card_id uuid,
     order_date timestamp,
     total numeric(16, 4) DEFAULT 0 NOT NULL,

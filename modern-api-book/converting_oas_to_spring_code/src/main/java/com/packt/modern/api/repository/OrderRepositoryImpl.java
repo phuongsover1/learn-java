@@ -58,8 +58,8 @@ public class OrderRepositoryImpl implements OrderRepositoryExt {
             VALUES\s
             (?, ?, ?, ?, ?, ?)
             """)
-        .setParameter(1, m.getAddress().getId())
-        .setParameter(2, m.getCard().getId())
+        .setParameter(1, m.getAddress() == null ? null : m.getAddress().getId())
+        .setParameter(2, m.getCard() == null ? null : m.getCard().getId())
         .setParameter(3, m.getCustomerId())
         .setParameter(4, orderDate)
         .setParameter(5, total)
@@ -73,7 +73,7 @@ public class OrderRepositoryImpl implements OrderRepositoryExt {
     OrderEntity entity = (OrderEntity) em.createNativeQuery(
             """
                 SELECT o.* FROM ecomm.orders o WHERE o.customer_id = ? AND o.order_date >= ?
-                """)
+                """, OrderEntity.class)
         .setParameter(1, m.getCustomerId())
         .setParameter(2, OffsetDateTime.ofInstant(orderDate.toInstant(), ZoneId.of("Z")).truncatedTo(ChronoUnit.MICROS))
         .getSingleResult();

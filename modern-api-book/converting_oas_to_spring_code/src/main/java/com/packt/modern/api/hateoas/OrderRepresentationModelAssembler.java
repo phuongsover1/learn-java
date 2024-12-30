@@ -50,8 +50,8 @@ public class OrderRepresentationModelAssembler extends RepresentationModelAssemb
     BeanUtils.copyProperties(entity, resource);
     resource.id(entity.getId().toString())
         .customer(uAssembler.toModel(entity.getUserEntity()))
-        .address(aAssembler.toModel(entity.getAddressEntity()))
-        .card(cAssembler.toModel(entity.getCardEntity()))
+        .address(entity.getAddressEntity() != null ? aAssembler.toModel(entity.getAddressEntity()) : null)
+        .card(entity.getCardEntity() != null ?  cAssembler.toModel(entity.getCardEntity()) : null)
         .items(itemService.toModelList(entity.getItems()))
         .date(entity.getOrderDate().toInstant().atOffset(ZoneOffset.UTC));
     log.info("\nResource = {}", resource);

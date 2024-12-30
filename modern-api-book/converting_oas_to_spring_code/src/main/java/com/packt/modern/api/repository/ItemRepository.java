@@ -1,6 +1,7 @@
 package com.packt.modern.api.repository;
 
 import com.packt.modern.api.entity.ItemEntity;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -14,6 +15,7 @@ public interface ItemRepository extends CrudRepository<ItemEntity, UUID> {
   )
   Iterable<ItemEntity> findByCustomerId(String customerId);
 
+  @Modifying
   @Query(
       value = "delete from ecomm.cart_item where item_id in (:ids) and cart_id = :cartId",
       nativeQuery = true

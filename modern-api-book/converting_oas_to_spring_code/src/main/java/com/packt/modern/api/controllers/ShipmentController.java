@@ -16,16 +16,14 @@ import static org.springframework.http.ResponseEntity.notFound;
 public class ShipmentController implements ShipmentApi {
   private final ShipmentService sService;
   private final ShipmentRepresentationAssembler assembler;
-  private final OrderService oService;
 
-  public ShipmentController(ShipmentService sService, ShipmentRepresentationAssembler assembler, OrderService oService) {
+  public ShipmentController(ShipmentService sService, ShipmentRepresentationAssembler assembler) {
     this.sService = sService;
     this.assembler = assembler;
-    this.oService = oService;
   }
 
   @Override
   public ResponseEntity<Shipment> getShipmentByOrderId(String id) {
-    return oService.getShipmentByOrderId(id).map(assembler::toModel).map(ResponseEntity::ok).orElse(notFound().build());
+    return sService.getShipmentByOrderId(id).map(assembler::toModel).map(ResponseEntity::ok).orElse(notFound().build());
   }
 }

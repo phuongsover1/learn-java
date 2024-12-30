@@ -145,17 +145,21 @@ create TABLE IF NOT EXISTS ecomm.orders (
     shipment_id uuid,
     status varchar(24),
     PRIMARY KEY(id),
+
     FOREIGN KEY(customer_id)
     REFERENCES ecomm."user"(id),
+
     FOREIGN KEY(address_id)
     REFERENCES ecomm.address(id),
+
     FOREIGN KEY(card_id)
     REFERENCES ecomm.card(id),
+
     FOREIGN KEY(payment_id)
     REFERENCES ecomm.payment(id),
+
     FOREIGN KEY(shipment_id)
     REFERENCES ecomm.shipment(id),
-    PRIMARY KEY(id)
     );
 
 create TABLE IF NOT EXISTS ecomm.item (

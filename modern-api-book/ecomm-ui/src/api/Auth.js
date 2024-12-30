@@ -10,7 +10,7 @@ export default class Auth {
     this.config = new Config();
   }
 
-  async logInUser(credentials) {
+  async loginUser(credentials) {
     return fetch(this.config.LOGIN_URL, {
       method: "POST",
       mode: "cors",
@@ -22,6 +22,28 @@ export default class Auth {
       .then((response) => Promise.all([response, response.json()]))
       .then(([response, json]) => {
         if (!response.ok) return { success: false, error: json };
+        this.storeTokens(json);
+        return { success: true, data: json };
+      })
+      .catch((e) => {
+        this.handleError(e);
+      });
+  }
+
+  async refreshToken() {
+    return fetch(this.config.LOGIN_URL + "/refresh", {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        ...this.config.defaultHeaders(),
+      },
+      body: JSON.stringify({ refreshToken: this.token.refreshToken }),
+    })
+      .then((response) => Promise.all([response, response.json()]))
+      .then(([response, json]) => {
+        if (!response.ok) {
+          return { success: false, error: json };
+        }
         this.storeTokens(json);
         return { success: true, data: json };
       })

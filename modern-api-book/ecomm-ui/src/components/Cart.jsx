@@ -1,16 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import CartClient from "../api/CartClient";
-import OrderClient from "../api/OrderClient";
 import CustomerClient from "../api/CustomerClient";
-import CartItem from "./CartItem.jsx";
-import {
-  removeItem,
-  updateCart,
-  useCartContext,
-} from "../hooks/CartContext.js";
+import OrderClient from "../api/OrderClient";
+import { removeItem, updateCart, useCartContext } from "../hooks/CartContext";
+import CartItem from "./CartItem";
 
-export default function Cart({ auth }) {
+const Cart = ({ auth }) => {
   const [grandTotal, setGrandTotal] = useState(0);
   const [noRecMsg, setNoRecMsg] = useState("Loading...");
   const navigate = useNavigate();
@@ -19,15 +15,10 @@ export default function Cart({ auth }) {
   const customerClient = new CustomerClient(auth);
   const { cartItems, dispatch } = useCartContext();
 
-  const caltotal = (items) => {
+  const calTotal = (items) => {
     let total = 0;
     items?.forEach((i) => (total = total + i?.unitPrice * i?.quantity));
     return total.toFixed(2);
-  };
-
-  const refreshCart = (items) => {
-    setGrandTotal(caltotal(items));
-    dispatch(updateCart(items));
   };
 
   const increaseQty = async (id) => {
@@ -43,6 +34,25 @@ export default function Cart({ auth }) {
         }
       } else {
         setNoRecMsg(res && typeof res === "string" ? res : res.error.message);
+      }
+    }
+  };
+
+  const decreaseQty = async (id) => {
+    const idx = cartItems.findIndex((i) => i.id === id);
+    if (~idx && cartItems[idx].quantity <= 1) {
+      return deleteItem(id);
+    } else if (cartItems[idx]?.quantity > 1) {
+      cartItems[idx].quantity = cartItems[idx].quantity - 1;
+      const res = await cartClient.addOrUpdate(cartItems[idx]);
+      if (res && res.success) {
+        refreshCart(res.data);
+        if (res.data?.length < 1) {
+          setNoRecMsg("Cart is empty.");
+        }
+        return;
+      } else {
+        setNoRecMsg(res && typeof res === "string" ? res : res?.error?.message);
       }
     }
   };
@@ -66,23 +76,26 @@ export default function Cart({ auth }) {
     }
   };
 
-  const decreaseQty = async (id) => {
-    const idx = cartItems.findIndex((i) => i.id === id);
-    if (idx !== -1 && cartItems[idx].quantity <= 1) {
-      return deleteItem(id);
-    } else if (cartItems[idx]?.quantity > 1) {
-      cartItems[idx].quantity = cartItems[idx].quantity - 1;
-      const res = await cartClient.addOrUpdate(cartItems[idx]);
+  const refreshCart = (items) => {
+    setGrandTotal(calTotal(items));
+    dispatch(updateCart(items));
+  };
+
+  useEffect(() => {
+    async function fetch() {
+      const res = await cartClient.fetch();
       if (res && res.success) {
-        refreshCart(res.data);
-        if (res.data?.length < 1) {
-          setNoRecMsg("Cart is empty");
+        console.log(res.data);
+        refreshCart(res.data.items);
+        if (res.data?.items && res.data.items?.length < 1) {
+          setNoRecMsg("Cart is empty.");
         }
       } else {
-        setNoRecMsg(res && typeof res === "string" ? res : res?.error?.message);
+        setNoRecMsg(res && typeof res === "string" ? res : res.error.message);
       }
     }
-  };
+    fetch();
+  }, []);
 
   const checkout = async () => {
     const res = await customerClient.fetch();
@@ -103,10 +116,11 @@ export default function Cart({ auth }) {
       }
     } else {
       setNoRecMsg(
-        res && typeof res === "string" ? res : "error retrieving customer"
+        res && typeof res === "string" ? res : "error retreiving customer"
       );
     }
   };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex shadow-md my-4">
@@ -207,7 +221,7 @@ export default function Cart({ auth }) {
             <button
               className="bg-indigo-500 font-semibold hover:bg-indigo-600 py-3 text-sm text-white uppercase w-full disabled:opacity-50"
               onClick={checkout}
-              disabled={grandTotal === 0 ? true : false}
+              disabled={grandTotal == 0 ? true : false}
             >
               Checkout
             </button>
@@ -216,4 +230,6 @@ export default function Cart({ auth }) {
       </div>
     </div>
   );
-}
+};
+
+export default Cart;

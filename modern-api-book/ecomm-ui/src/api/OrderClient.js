@@ -33,7 +33,11 @@ export default class OrderClient {
 
   async add(payload) {
     if (this.config.tokenExpired()) await this.auth.refreshToken();
-    payload = { ...payload, customerId: this.auth.uesrId };
+    console.log(this.auth);
+
+    payload = { ...payload, customerId: this.auth.token.userId };
+    console.log("payload: " + JSON.stringify(payload));
+
     return fetch(this.config.ORDER_URL, {
       method: "POST",
       mode: "cors",
@@ -48,7 +52,7 @@ export default class OrderClient {
         return { success: true, data: json };
       })
       .catch((e) => {
-        this.handleError(e);
+        console.log(e);
       });
   }
 

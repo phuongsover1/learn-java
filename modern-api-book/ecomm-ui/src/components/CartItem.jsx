@@ -1,24 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-export default function CartItem({
-  item,
-  increaseQty,
-  decreaseQty,
-  removeItem,
-}) {
+const CartItem = ({ item, increaseQty, decreaseQty, removeItem }) => {
   const des = item ? item.description?.split(".") : [];
   const author = des && des.length > 0 ? des[des.length - 1] : "";
   const [total, setTotal] = useState();
 
   const calTotal = (item) => {
-    setTotal((item?.unitPrice * item?.quantity).toFixed(2));
+    setTotal((item?.unitPrice * item?.quantity)?.toFixed(2));
   };
 
   const updateQty = (qty) => {
-    if (qty === -1) decreaseQty(item?.id);
-    else if (qty === 1) increaseQty(item?.id);
-    else return false;
+    if (qty === -1) {
+      decreaseQty(item?.id);
+    } else if (qty === 1) {
+      increaseQty(item?.id);
+    } else {
+      return false;
+    }
     calTotal(item);
   };
 
@@ -30,19 +29,19 @@ export default function CartItem({
     <div className="flex items-center hover:bg-gray-200 -mx-8 px-6 py-5">
       <div className="flex w-2/5">
         <div className="w-32">
-          <img src={item?.imageUrl} alt="" className="h-24" />
+          <img className="h-24" src={item?.imageUrl} alt="" />
         </div>
         <div className="flex flex-col justify-between ml-4 flex-grow">
           <Link
-            to={"/products/" + item?.id}
+            to={"/products/" + item.id}
             className="font-bold text-sm text-indigo-500 hover:text-indigo-700"
           >
             {item?.name}
           </Link>
-          <span className="text-xs">Author: {author} </span>
+          <span className="text-xs">Author: {author}</span>
           <button
             className="font-semibold hover:text-red-500 text-indigo-500 text-xs text-left"
-            onClick={() => removeItem(item?.id)}
+            onClick={() => removeItem(item.id)}
           >
             Remove
           </button>
@@ -54,6 +53,7 @@ export default function CartItem({
             <path d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z" />
           </svg>
         </span>
+
         <input
           className="mx-2 border text-center w-8"
           type="text"
@@ -72,4 +72,6 @@ export default function CartItem({
       <span className="text-center w-1/5 font-semibold text-sm">${total}</span>
     </div>
   );
-}
+};
+
+export default CartItem;

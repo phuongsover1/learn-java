@@ -19,7 +19,7 @@ export default function ProductCard({ auth, product }) {
   };
 
   const findQty = (id) => {
-    const idx = cartClient.findIndex((i) => i.id === id);
+    const idx = cartItems.findIndex((i) => i.id === id);
     if (~idx) {
       return cartItems[idx].quantity;
     }

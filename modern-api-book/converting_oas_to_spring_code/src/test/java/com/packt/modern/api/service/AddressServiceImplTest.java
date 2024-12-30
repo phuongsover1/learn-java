@@ -12,10 +12,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AddressServiceImplTest {
@@ -55,6 +60,21 @@ class AddressServiceImplTest {
     then(e.getCity()).as("Check city is set").isEqualTo(entity.getCity());
     then(e.getCountry()).as("Check country is set").isEqualTo(entity.getCountry());
     then(e.getPincode()).as("Check pincode is set").isEqualTo(entity.getPincode());
+  }
+
+  @Test
+  @DisplayName("delete address by given exising id")
+  public void deleteAddressesByExistId() {
+    // given
+    given(repository.findById(UUID.fromString(id))).willReturn(Optional.of(entity));
+    willDoNothing().given(repository).deleteById(UUID.fromString(id));
+
+    // when
+    service.deleteAddressById(id);
+
+    // then
+    verify(repository, times(1)).findById(UUID.fromString(id));
+    verify(repository, times(1)).deleteById(UUID.fromString(id));
   }
 }
 

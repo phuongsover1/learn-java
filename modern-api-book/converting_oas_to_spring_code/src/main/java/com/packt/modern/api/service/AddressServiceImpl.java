@@ -1,8 +1,10 @@
 package com.packt.modern.api.service;
 
+import com.packt.modern.api.exceptions.ResourceNotFoundException;
 import com.packt.modern.api.model.AddAddressReq;
 import com.packt.modern.api.entity.AddressEntity;
 import com.packt.modern.api.repository.AddressRepository;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -23,6 +25,8 @@ public class AddressServiceImpl implements  AddressService{
 
   @Override
   public void deleteAddressById(String id) {
+      addressRepository.findById(UUID.fromString(id))
+              .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
       addressRepository.deleteById(UUID.fromString(id));
   }
 

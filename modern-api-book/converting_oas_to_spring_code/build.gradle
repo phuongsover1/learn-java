@@ -72,3 +72,8 @@ bootJar {
         attributes 'Manifest-Version': "1.0"
     }
 }
+
+test {
+    useJUnitPlatform()
+}
+

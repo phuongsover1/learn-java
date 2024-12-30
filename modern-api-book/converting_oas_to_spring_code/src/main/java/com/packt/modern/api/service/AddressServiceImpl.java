@@ -43,6 +43,6 @@ public class AddressServiceImpl implements  AddressService{
         .setNumber(addAddressReq.getNumber())
         .setPincode(addAddressReq.getPincode())
         .setStreet(addAddressReq.getStreet())
-        .setResidency(addressEntity.getResidency());
+        .setResidency(addAddressReq.getResidency());
   }
 }

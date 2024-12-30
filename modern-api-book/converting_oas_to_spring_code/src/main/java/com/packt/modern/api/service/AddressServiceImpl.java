@@ -26,7 +26,7 @@ public class AddressServiceImpl implements  AddressService{
   @Override
   public void deleteAddressById(String id) {
       addressRepository.findById(UUID.fromString(id))
-              .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
+              .orElseThrow(() -> new ResourceNotFoundException(String.format("No Address found with id %s", id)));
       addressRepository.deleteById(UUID.fromString(id));
   }
 

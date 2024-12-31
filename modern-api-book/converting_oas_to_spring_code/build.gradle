@@ -3,6 +3,40 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.0'
     id 'java'
     id 'org.hidetake.swagger.generator' version '2.19.2'
+    id 'jacoco'
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+    reportsDirectory = layout.buildDirectory.dir("$buildDir/jacoco")
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(
+                    dir: it,
+                    excludes: [
+                            'com/packt/modern/api/entity/*',
+                            'com/packt/modern/api/model/*',
+                            'com/packt/modern/api/*Api.*',
+                            'com/packt/modern/api/config/*',
+                            'com/packt/modern/api/security/UNUSED/*',
+                    ]
+            )
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.9
+            }
+        }
+    }
 }
 
 group = 'com.packt.modern.api'
@@ -10,7 +44,7 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_17
 
 processResources {
-  dependsOn(generateSwaggerCode)
+    dependsOn(generateSwaggerCode)
 }
 
 swaggerSources {
@@ -75,5 +109,6 @@ bootJar {
 
 test {
     useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
 }
 

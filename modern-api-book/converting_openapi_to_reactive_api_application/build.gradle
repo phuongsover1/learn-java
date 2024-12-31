@@ -41,6 +41,10 @@ repositories {
 }
 
 dependencies {
+    // JWT
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'com.auth0:java-jwt:4.3.0'
+
     // OpenAPI Starts
     swaggerCodegen 'org.openapitools:openapi-generator-cli:6.2.1'
     compileOnly 'io.swagger:swagger-annotations:1.6.4'

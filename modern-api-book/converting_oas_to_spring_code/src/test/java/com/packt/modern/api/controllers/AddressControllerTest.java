@@ -228,7 +228,7 @@ class AddressControllerTest {
     );
 
     // then
-//    verify(service, times(1)).deleteAddressById(nonExistId);
+    verify(service, times(1)).deleteAddressById(nonExistId);
     result.andExpect(status().isNotFound());
     result.andExpect(jsonPath("errorCode", is("PACKT-0010")));
     result.andExpect(jsonPath("message", is("Requested resource not found No Address found with id " + nonExistId)));

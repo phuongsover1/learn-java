@@ -43,6 +43,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
+@SuppressWarnings("deprecation")
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class Securityconfig {
 

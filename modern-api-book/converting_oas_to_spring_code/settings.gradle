@@ -4,4 +4,4 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-rootProject.name = 'converting_oas_to_spring_code'
+rootProject.name = 'converting-oas-to-spring-code'

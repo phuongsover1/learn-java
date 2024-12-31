@@ -14,4 +14,5 @@ public class Constants {
   public static final long EXPIRATION_TIME = 900_000;
   public static final String ROLE_CLAIM = "roles";
   public static final String AUTHORITY_PREFIX = "ROLE_";
+  public static final String ACTUATOR_URL_PREFIX = "/actuator/**";
 }

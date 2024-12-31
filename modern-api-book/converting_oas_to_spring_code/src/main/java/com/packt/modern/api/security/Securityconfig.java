@@ -13,7 +13,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,14 +21,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -60,7 +55,6 @@ public class Securityconfig {
 
   @Value("${app.security.jwt.private-key-passphrase}")
   private String privateKeyPassphrase;
-
 
   @Bean
   public KeyStore keyStore() {
@@ -141,6 +135,8 @@ public class Securityconfig {
                     .permitAll()
                     .requestMatchers("/api/v1/addresses/**")
                     .hasAuthority(RoleEnum.ADMIN.getAuthority())
+                    .requestMatchers(new AntPathRequestMatcher(ACTUATOR_URL_PREFIX))
+                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .oauth2ResourceServer(
@@ -151,15 +147,17 @@ public class Securityconfig {
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     return http.build();
   }
-//  @Bean
-//  public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-//   return authenticationConfiguration.getAuthenticationManager();
-//  }
-//
-//  @Bean
-//  public UserDetailsService userDetailsService() {
-//    return userService;
-//  }
+
+  //  @Bean
+  //  public AuthenticationManager authenticationManager(AuthenticationConfiguration
+  // authenticationConfiguration) throws Exception {
+  //   return authenticationConfiguration.getAuthenticationManager();
+  //  }
+  //
+  //  @Bean
+  //  public UserDetailsService userDetailsService() {
+  //    return userService;
+  //  }
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
@@ -175,13 +173,12 @@ public class Securityconfig {
     return source;
   }
 
-
-   private Converter<Jwt, AbstractAuthenticationToken> getJwtAuthenticationConverter() {
-     JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
-     authoritiesConverter.setAuthorityPrefix(AUTHORITY_PREFIX);
-     authoritiesConverter.setAuthoritiesClaimName(ROLE_CLAIM);
-     JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-     converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
-     return converter;
-   }
+  private Converter<Jwt, AbstractAuthenticationToken> getJwtAuthenticationConverter() {
+    JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+    authoritiesConverter.setAuthorityPrefix(AUTHORITY_PREFIX);
+    authoritiesConverter.setAuthoritiesClaimName(ROLE_CLAIM);
+    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+    converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+    return converter;
+  }
 }

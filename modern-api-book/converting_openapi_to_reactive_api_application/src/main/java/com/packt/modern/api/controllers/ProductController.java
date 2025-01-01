@@ -3,18 +3,15 @@ package com.packt.modern.api.controllers;
 import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.status;
 
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ServerWebExchange;
-
 import com.packt.modern.api.ProductApi;
 import com.packt.modern.api.hateoas.ProductRepresentationModelAssembler;
 import com.packt.modern.api.model.Product;
 import com.packt.modern.api.service.ProductService;
-
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -31,10 +28,8 @@ public class ProductController implements ProductApi {
     @Override
   public Mono<ResponseEntity<Product>> getProduct(String id, ServerWebExchange exchange) {
 
-//    return pService.getProduct(id).map(p -> assembler.entityToModel(p, exchange))
-//        .map(p -> status(HttpStatus.OK).eTag(generateEtag(p)).body(p)).defaultIfEmpty(ResponseEntity.notFound().build());
-      return pService.getProduct(id).map(p -> assembler.entityToModel(p, exchange))
-              .map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
+    return pService.getProduct(id).map(p -> assembler.entityToModel(p, exchange))
+        .map(p -> status(HttpStatus.OK).eTag(generateEtag(p)).body(p)).defaultIfEmpty(ResponseEntity.notFound().build());
   }
   private String generateEtag(Product product) {
     return String.valueOf(product.hashCode());

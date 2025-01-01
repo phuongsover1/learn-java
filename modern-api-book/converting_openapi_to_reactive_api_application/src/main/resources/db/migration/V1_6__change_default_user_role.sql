@@ -1,0 +1,2 @@
+ALTER TABLE ecomm."user"
+    ALTER COLUMN role varchar(16) NOT NULL DEFAULT 'USER' NULL_TO_DEFAULT;

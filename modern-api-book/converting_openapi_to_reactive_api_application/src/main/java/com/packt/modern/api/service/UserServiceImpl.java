@@ -3,17 +3,22 @@ package com.packt.modern.api.service;
 import com.packt.modern.api.entity.AddressEntity;
 import com.packt.modern.api.entity.CardEntity;
 import com.packt.modern.api.entity.UserEntity;
-import com.packt.modern.api.exceptions.AddressNotFoundException;
-import com.packt.modern.api.exceptions.CustomerNotFoundException;
-import com.packt.modern.api.exceptions.ErrorCode;
-import com.packt.modern.api.exceptions.UserNotInAdress;
+import com.packt.modern.api.entity.UserTokenEntity;
+import com.packt.modern.api.exceptions.*;
+import com.packt.modern.api.model.RefreshToken;
+import com.packt.modern.api.model.SignInReq;
+import com.packt.modern.api.model.SignedInUser;
 import com.packt.modern.api.model.User;
-import com.packt.modern.api.repository.AddressRepository;
-import com.packt.modern.api.repository.CardRepository;
-import com.packt.modern.api.repository.UserAddressRepository;
-import com.packt.modern.api.repository.UserRepository;
+import com.packt.modern.api.repository.*;
+import com.packt.modern.api.security.JwtManager;
+import java.math.BigInteger;
+import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,16 +29,25 @@ public class UserServiceImpl implements UserService {
   private final CardRepository cRepo;
   private final UserAddressRepository UARepo;
   private final AddressRepository ARepo;
+  private final JwtManager jwtManager;
+  private final PasswordEncoder passwordEncoder;
+  private final UserTokenRepository userTokenRepository;
 
   public UserServiceImpl(
       UserRepository userRepository,
       CardRepository cRepo,
       UserAddressRepository uaRepo,
-      AddressRepository aRepo) {
+      AddressRepository aRepo,
+      JwtManager jwtManager,
+      PasswordEncoder passwordEncoder,
+      UserTokenRepository userTokenRepository) {
     this.userRepository = userRepository;
     this.cRepo = cRepo;
     UARepo = uaRepo;
     ARepo = aRepo;
+    this.jwtManager = jwtManager;
+    this.passwordEncoder = passwordEncoder;
+    this.userTokenRepository = userTokenRepository;
   }
 
   @Override
@@ -110,5 +124,138 @@ public class UserServiceImpl implements UserService {
                                 });
                       });
             });
+  }
+
+  @Override
+  public Mono<UserEntity> findUserByUsername(String username) {
+    if (Strings.isBlank(username)) {
+      return Mono.error(
+          new CustomerNotFoundException(String.format("Username %s not found", username)));
+    }
+    final String uname = username.trim();
+    return userRepository
+        .findByUsername(uname)
+        .switchIfEmpty(
+            Mono.error(
+                new CustomerNotFoundException(String.format("Username %s not found", uname))));
+  }
+
+  @Override
+  public Mono<SignedInUser> createUser(Mono<User> userMono) {
+    return userMono
+        .flatMap(this::checkUsernameAndPassword)
+        .flatMap(
+            user ->
+                userRepository
+                    .findByUsernameOrEmail(user.getUsername(), user.getEmail())
+                    .flatMap(count -> checkAndCreateUserIfNotExists(count, user))
+                    .onErrorStop()
+                    .switchIfEmpty(Mono.error(new GenericStatusError("Cannot create user")))
+                    .flatMap(this::createSignedInUserWithRefreshToken));
+  }
+
+  @Override
+  public Mono<SignedInUser> signIn(Mono<SignInReq> signInReqMono) {
+    return signInReqMono
+        .flatMap(
+            signInReq -> {
+              if (Strings.isBlank(signInReq.getUsername())) {
+                return Mono.error(new GenericStatusError("Username is empty"));
+              }
+              if (Strings.isBlank(signInReq.getPassword())) {
+                return Mono.error(new GenericStatusError("Password is empty"));
+              }
+              return userRepository
+                  .findByUsername(signInReq.getUsername())
+                  .switchIfEmpty(
+                      Mono.error(
+                          new UsernameNotFoundException(
+                              "Username " + signInReq.getUsername() + " not found")))
+                  .onErrorStop()
+                  .zipWith(Mono.just(signInReq.getPassword()));
+            })
+        .flatMap(
+            tuple -> {
+              String rawPassword = tuple.getT2();
+              UserEntity user = tuple.getT1();
+              if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+                return Mono.error(new GenericStatusError("Wrong password"));
+              }
+              return Mono.just(user);
+            })
+        .flatMap(this::getSignedInUser);
+  }
+
+  @Override
+  public Mono<SignedInUser> getSignedInUser(UserEntity userEntity) {
+    return userTokenRepository
+        .deleteByUserId(userEntity.getId())
+        .then(createSignedInUserWithRefreshToken(userEntity));
+  }
+
+  @Override
+  public Mono<SignedInUser> getAccessToken(Mono<RefreshToken> refreshTokenMono) {
+    return null;
+  }
+
+  @Override
+  public Mono<Void> removeRefreshToken(Mono<RefreshToken> refreshTokenMono) {
+    return null;
+  }
+
+  private Mono<UserEntity> checkAndCreateUserIfNotExists(int count, User user) {
+    if (count > 0)
+      return Mono.error(new GenericAlreadyExistsException("Use different username or email"));
+    return userRepository.save(toEntity(user));
+  }
+
+  private Mono<User> checkUsernameAndPassword(User user) {
+    if (Strings.isBlank(user.getUsername())) {
+      return Mono.error(new GenericStatusError("Username is required"));
+    }
+    if (Strings.isBlank(user.getPassword())) {
+      return Mono.error(new GenericStatusError("Password is required"));
+    }
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    return Mono.just(user);
+  }
+
+  private Mono<SignedInUser> createSignedInUserWithRefreshToken(UserEntity user) {
+    return createSignedInUser(user).flatMap(this::createRefreshToken);
+  }
+
+  private Mono<SignedInUser> createSignedInUser(UserEntity user) {
+    String token =
+        jwtManager.create(
+            org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .authorities(Objects.nonNull(user.getRole()) ? user.getRole() : "")
+                .build());
+    return Mono.just(
+        new SignedInUser()
+            .username(user.getUsername())
+            .accessToken(token)
+            .userId(user.getId().toString()));
+  }
+
+  private Mono<SignedInUser> createRefreshToken(SignedInUser signedInUser) {
+    String token = RandomHolder.randomKey(128);
+    signedInUser.setRefreshToken(token);
+    return userTokenRepository
+        .save(
+            new UserTokenEntity()
+                .setRefreshToken(token)
+                .setUserId(UUID.fromString(signedInUser.getUserId())))
+        .thenReturn(signedInUser);
+  }
+
+  private static class RandomHolder {
+    static final Random random = new Random();
+
+    public static String randomKey(int length) {
+      return String.format(
+          "%" + length + "s", new BigInteger(length * 5 /* base32, 2^5 */, random).toString(32));
+    }
   }
 }

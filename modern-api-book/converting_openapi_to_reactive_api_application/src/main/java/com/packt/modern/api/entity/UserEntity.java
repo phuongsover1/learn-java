@@ -1,13 +1,10 @@
 package com.packt.modern.api.entity;
 
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @Table(name = "ecomm.\"user\"")
 public class UserEntity {
@@ -35,7 +32,19 @@ public class UserEntity {
   private String phone;
 
   @Column("user_status")
-  private String userStatus;
+  private String userStatus = "ACTIVE";
+
+  @Column("role")
+  private String role = "USER";
+
+  public String getRole() {
+    return role;
+  }
+
+  public UserEntity setRole(String role) {
+    this.role = role;
+    return this;
+  }
 
   public UUID getId() {
     return id;

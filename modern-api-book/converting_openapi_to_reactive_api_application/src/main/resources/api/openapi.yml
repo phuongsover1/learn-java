@@ -34,6 +34,8 @@ tags:
     description: Operations about shippings
   - name: product
     description: Operations about products
+  - name: user
+    description: Operations about signup, signin and so on
 
 
 paths:
@@ -354,6 +356,30 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+    post:
+      tags:
+        - user
+      summary: Create User
+      description: Create User and Return Access Token
+      operationId: signUp
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        201:
+          description: Created User successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/SignedInUser'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignedInUser'
   /api/v1/customers/{id}:
     get:
       tags:
@@ -472,7 +498,80 @@ paths:
         404:
           description: Given customer ID or address ID doesn't exist
           content: {}
-      
+
+  /api/v1/auth/token:
+    post:
+      tags:
+        - user
+      summary: Signin the customer (user)
+      description: Generates the JWT and refresh token
+      operationId: signIn
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/SignInReq"
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInReq"
+      responses:
+        200:
+          description: Returns the access and refresh token
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/SignedInUser"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignedInUser"
+    delete:
+      tags:
+        - user
+      summary: Signouts the customer (user)
+      description: Signouts the customer (user)
+      operationId: signOut
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/RefreshToken"
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshToken"
+      responses:
+        202:
+          description: Accetps the request for logout
+          content: {}
+
+  /api/v1/auth/token/refresh:
+    post:
+      tags:
+        - user
+      summary: Provides new JWT based on valid refresh token.
+      description: Provides new JWT based on valid refresh token.
+      operationId: getAccessToken
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/RefreshToken"
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshToken"
+
+      responses:
+        200:
+          description: For successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/SignedInUser"
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignedInUser"
+        400:
+          description: refresh token not exist
+          content: {}
   /api/v1/addresses:
     get:
       tags:
@@ -1136,4 +1235,37 @@ components:
           type: string
         name:
           description: Tag Name
+          type: string
+    SignInReq:
+      description:  Request body for sign-in
+      type: object
+      properties:
+        username:
+          description: username of the User
+          type: string
+        password:
+          description: password of the User
+          type: string
+    SignedInUser:
+      description: Signed-in User Information
+      type: object
+      properties:
+        refreshToken:
+          description: Contains the Refresh Token
+          type: string
+        accessToken:
+          description: Contains the JWT Access Token
+          type: string
+        username:
+          description: User Name
+          type: string
+        userId:
+          description: User Identifier
+          type: string
+    RefreshToken:
+      description: Contains the Refresh Token
+      type: object
+      properties:
+        refreshToken:
+          description: Refresh Token
           type: string

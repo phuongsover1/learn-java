@@ -3,6 +3,9 @@ package com.packt.modern.api.security;
 import static com.packt.modern.api.security.Constants.*;
 
 import java.util.List;
+import java.util.Map;
+
+import com.packt.modern.api.entity.RoleEnum;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -11,6 +14,11 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
@@ -53,6 +61,8 @@ public class SecurityConfig {
                     .permitAll()
                     .pathMatchers(ACTUATOR_URL_PREFIX)
                     .permitAll()
+//                    .pathMatchers("/api/v1/addresses/**")
+//                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
                     .anyExchange()
                     .authenticated())
         .oauth2ResourceServer(
@@ -83,5 +93,15 @@ public class SecurityConfig {
     JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
     return new ReactiveJwtAuthenticationConverterAdapter(converter);
+  }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    Map<String, PasswordEncoder> encoders = Map.of(
+            ENCODER_ID, new BCryptPasswordEncoder(),
+            "pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8(),
+            "scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8()
+    );
+    return new DelegatingPasswordEncoder(ENCODER_ID, encoders);
   }
 }

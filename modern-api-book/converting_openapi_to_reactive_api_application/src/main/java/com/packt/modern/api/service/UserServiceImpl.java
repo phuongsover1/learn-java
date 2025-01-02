@@ -198,16 +198,20 @@ public class UserServiceImpl implements UserService {
     return refreshTokenMono
         .flatMap(this::validateRefreshToken)
         .flatMap(
-            refToken -> userTokenRepository
-                .findByRefreshToken(refToken.getRefreshToken())
-                .switchIfEmpty(Mono.error(new GenericStatusError("Refresh Token is not exists")))
-                .flatMap(userToken -> userRepository.findById(userToken.getUserId()))
-                .flatMap(this::createSignedInUser)
-                .map(
-                    signedInUser -> {
-                      signedInUser.setRefreshToken(refToken.getRefreshToken());
-                      return signedInUser;
-                    }));
+            refToken ->
+                userTokenRepository
+                    .findByRefreshToken(refToken.getRefreshToken())
+                    .switchIfEmpty(
+                        Mono.error(new GenericStatusError("Refresh Token is not exists")))
+                    .flatMap(userToken -> userRepository.findById(userToken.getUserId()))
+                    .flatMap(this::createSignedInUser)
+                    .map(signedInUser -> setRefreshTokenToSingedInUser(signedInUser, refToken)));
+  }
+
+  private SignedInUser setRefreshTokenToSingedInUser(
+      SignedInUser signedInUser, RefreshToken refreshToken) {
+    signedInUser.setRefreshToken(refreshToken.getRefreshToken());
+    return signedInUser;
   }
 
   private Mono<RefreshToken> validateRefreshToken(RefreshToken refreshToken) {
@@ -218,7 +222,11 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public Mono<Void> removeRefreshToken(Mono<RefreshToken> refreshTokenMono) {
-    return null;
+    return refreshTokenMono
+        .flatMap(this::validateRefreshToken)
+        .flatMap(refToken -> userTokenRepository.findByRefreshToken(refToken.getRefreshToken()))
+        .switchIfEmpty(Mono.error(new GenericStatusError("Refresh Token is not exists!")))
+        .flatMap(userTokenRepository::delete);
   }
 
   private Mono<UserEntity> checkAndCreateUserIfNotExists(int count, User user) {

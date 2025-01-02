@@ -195,7 +195,25 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public Mono<SignedInUser> getAccessToken(Mono<RefreshToken> refreshTokenMono) {
-    return null;
+    return refreshTokenMono
+        .flatMap(this::validateRefreshToken)
+        .flatMap(
+            refToken -> userTokenRepository
+                .findByRefreshToken(refToken.getRefreshToken())
+                .switchIfEmpty(Mono.error(new GenericStatusError("Refresh Token is not exists")))
+                .flatMap(userToken -> userRepository.findById(userToken.getUserId()))
+                .flatMap(this::createSignedInUser)
+                .map(
+                    signedInUser -> {
+                      signedInUser.setRefreshToken(refToken.getRefreshToken());
+                      return signedInUser;
+                    }));
+  }
+
+  private Mono<RefreshToken> validateRefreshToken(RefreshToken refreshToken) {
+    if (Strings.isBlank(refreshToken.getRefreshToken()))
+      return Mono.error(new GenericStatusError("Refresh token is empty"));
+    return Mono.just(refreshToken);
   }
 
   @Override

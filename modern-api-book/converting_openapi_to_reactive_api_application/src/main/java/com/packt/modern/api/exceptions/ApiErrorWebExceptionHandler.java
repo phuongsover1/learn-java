@@ -70,7 +70,7 @@ public class ApiErrorWebExceptionHandler extends AbstractErrorWebExceptionHandle
       errorCode = GENERIC_ALREADY_EXISTS;
     } else if (throwable instanceof AddressNotFoundException) {
       errorCode = ADDRESS_NOT_FOUND;
-    } else if (throwable instanceof org.springframework.web.server.ResponseStatusException) {
+    } else if (throwable instanceof GenericStatusError) {
       errorCode = GENERIC_STATUS_ERROR;
     }
 

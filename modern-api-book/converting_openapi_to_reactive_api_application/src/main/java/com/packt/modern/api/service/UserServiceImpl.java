@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
   public Mono<UserEntity> findUserByUsername(String username) {
     if (Strings.isBlank(username)) {
       return Mono.error(
-          new CustomerNotFoundException(String.format("Username %s not found", username)));
+          new IllegalArgumentException("Username is empty!"));
     }
     final String uname = username.trim();
     return userRepository
@@ -237,10 +237,10 @@ public class UserServiceImpl implements UserService {
 
   private Mono<User> checkUsernameAndPassword(User user) {
     if (Strings.isBlank(user.getUsername())) {
-      return Mono.error(new GenericStatusError("Username is required"));
+      return Mono.error(new IllegalArgumentException("Username is required"));
     }
     if (Strings.isBlank(user.getPassword())) {
-      return Mono.error(new GenericStatusError("Password is required"));
+      return Mono.error(new IllegalArgumentException("Password is required"));
     }
     user.setPassword(passwordEncoder.encode(user.getPassword()));
     return Mono.just(user);

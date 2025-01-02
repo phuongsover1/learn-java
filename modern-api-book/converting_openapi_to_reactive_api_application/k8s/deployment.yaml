@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: reactive-api
+  name: reactive-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reactive-api
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: reactive-api
+    spec:
+      containers:
+      - image: 192.168.1.10:5000/converting-openapi-to-reactive-api:0.0.1-SNAPSHOT
+        name: converting-openapi-to-reactive-api
+        resources: {}
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: reactive-api
+  name: reactive-api
+spec:
+  ports:
+  - name: 8081-8080
+    port: 8081
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: reactive-api
+  type: ClusterIP
+status:
+  loadBalancer: {}

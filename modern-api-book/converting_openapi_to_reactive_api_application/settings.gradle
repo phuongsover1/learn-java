@@ -4,4 +4,4 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-rootProject.name = 'converting_openapi_to_reactive_api'
+rootProject.name = 'converting-openapi-to-reactive-api'

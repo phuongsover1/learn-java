@@ -61,8 +61,8 @@ public class SecurityConfig {
                     .permitAll()
                     .pathMatchers(ACTUATOR_URL_PREFIX)
                     .permitAll()
-//                    .pathMatchers("/api/v1/addresses/**")
-//                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
+                    .pathMatchers("/api/v1/addresses/**")
+                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
                     .anyExchange()
                     .authenticated())
         .oauth2ResourceServer(

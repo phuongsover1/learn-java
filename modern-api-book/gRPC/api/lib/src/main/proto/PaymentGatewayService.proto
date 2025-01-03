@@ -29,3 +29,74 @@ service SourceService {
       returns (AttachOrDetachReq.Response);
 }
 
+message Charge {
+  string id = 1;
+  uint32 amount = 2;
+  uint32 amountCaptured = 3;
+  uint32 amountRefunded = 4;
+  string balanceTransactionId = 5;
+  BillingDetails billingDetails = 6;
+  string calculatedStatementDescriptor = 7;
+  bool captured = 8;
+  uint64 created = 9;
+  string currency = 10;
+  string customerId = 11;
+  string description = 12;
+  bool disputed = 13;
+  uint32 failureCode = 14;
+  string failureMessage = 15;
+  string invoiceId = 16;
+  string orderId = 17;
+  bool paid = 18;
+  string paymentMethodId = 19;
+  PaymentMethodDetails paymentMethodDetails = 20;
+  string receiptEmail = 21;
+  string receiptNumber = 22;
+  bool refunded = 23;
+  repeated Refund refunds = 24;
+  string statementDescriptor = 25;
+  enum Status {
+    SUCCEEDED = 0;
+    PENDING = 1;
+    FAILED = 2;
+  }
+  Status status = 26;
+  string sourceId = 27;
+}
+
+message CreateChargeReq {
+  uint32 amount = 1;
+  string currency = 2;
+  string customerId = 3;
+  string description = 4;
+  string receiptEmail = 5;
+  Source sourceId = 6;
+  string statementDescriptor = 7;
+  message Response { Charge charge = 1; }
+}
+
+message UpdateChargeReq {
+  string chargeId = 1;
+  string customerId = 2;
+  string description = 3;
+  string receiptEmail = 4;
+  message Response { Charge charge = 1; }
+}
+
+message CaptureChargeReq {
+  string chargeId = 1;
+  uint32 amount = 2;
+  string receiptEmail = 3;
+  string statementDescriptor = 4;
+  message Response { Charge charge = 1; }
+}
+
+message ChargeId {
+  string id = 1;
+  message Response { Charge charge = 1; }
+}
+
+message CustomerId {
+  string id = 1;
+  message Response { repeated Charge charge = 1; }
+}

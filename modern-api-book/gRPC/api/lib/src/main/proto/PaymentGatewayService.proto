@@ -1,0 +1,31 @@
+syntax = "proto3";
+package com.packtpub.v1;
+option java_package = "com.packt.modern.api.grpc.v1";
+option java_multiple_files = true;
+
+service ChargeService {
+  rpc Create(CreateChargeReq)
+      returns (CreateChargeReq.Response);
+  rpc Retrieve(ChargeId)
+  returns (ChargeId.Response);
+  rpc Update(UpdateChargeReq)
+      returns (UpdateChargeReq.Response);
+  rpc Capture(CaptureChargeReq)
+      returns (CaptureChargeReq.Response);
+  rpc RetrieveAll(CustomerId)
+      returns (CustomerId.Response);
+}
+
+service SourceService {
+  rpc Create(CreateSourceReq)
+      returns (CreateSourceReq.Response);
+  rpc Retrieve(SourceId)
+      returns (SourceId.Response);
+  rpc Update(UpdateSourceReq)
+      returns (UpdateSourceReq.Response);
+  rpc Attach(AttachOrDetachReq)
+      returns (AttachOrDetachReq.Response);
+  rpc Detach(AttachOrDetachReq)
+      returns (AttachOrDetachReq.Response);
+}
+

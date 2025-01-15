@@ -3,11 +3,14 @@ package com.packtpub.v1;
 option java_package = "com.packt.modern.api.grpc.v1";
 option java_multiple_files = true;
 
+import "google/protobuf/timestamp.proto";
+
+
 service ChargeService {
   rpc Create(CreateChargeReq)
       returns (CreateChargeReq.Response);
   rpc Retrieve(ChargeId)
-  returns (ChargeId.Response);
+      returns (ChargeId.Response);
   rpc Update(UpdateChargeReq)
       returns (UpdateChargeReq.Response);
   rpc Capture(CaptureChargeReq)
@@ -72,7 +75,7 @@ message CreateChargeReq {
   string receiptEmail = 5;
   Source sourceId = 6;
   string statementDescriptor = 7;
-  message Response { Charge charge = 1; }
+  message Response {Charge charge = 1;}
 }
 
 message UpdateChargeReq {
@@ -80,7 +83,7 @@ message UpdateChargeReq {
   string customerId = 2;
   string description = 3;
   string receiptEmail = 4;
-  message Response { Charge charge = 1; }
+  message Response {Charge charge = 1;}
 }
 
 message CaptureChargeReq {
@@ -88,15 +91,160 @@ message CaptureChargeReq {
   uint32 amount = 2;
   string receiptEmail = 3;
   string statementDescriptor = 4;
-  message Response { Charge charge = 1; }
+  message Response {Charge charge = 1;}
 }
 
 message ChargeId {
   string id = 1;
-  message Response { Charge charge = 1; }
+  message Response {Charge charge = 1;}
 }
 
 message CustomerId {
   string id = 1;
-  message Response { repeated Charge charge = 1; }
+  message Response {repeated Charge charge = 1;}
+}
+
+message BillingDetails {
+  Address address = 1;
+  string email = 2;
+  string name = 3;
+  string phone = 4;
+}
+message Card {
+  string id = 1;
+  string name = 2;
+  Address address = 3;
+  string brand = 4;
+  string country = 5;
+  uint32 expMonth = 6;
+  uint32 expYear = 7;
+  string fingerprint = 8;
+  string funding = 9;
+  uint32 installments = 10;
+  string last4 = 11;
+  string customer = 12;
+}
+
+message StripeAccount {
+  string id = 1;
+}
+
+message PaymentMethodDetails {
+  Card card = 1;
+  string type = 2;
+  StripeAccount stripeAccount = 3;
+}
+
+message Refund {
+  string id = 1;
+  uint32  amount =2;
+  string fee = 3;
+  google.protobuf.Timestamp created = 4;
+  string currency = 5;
+}
+
+// SourceService types declaration
+enum Flow {
+  REDIRECT = 0;
+  RECEIVER = 1;
+  CODEVERIFICATION = 2;
+  NONE = 3;
+}
+
+enum Usage {
+  REUSABLE = 0;
+  SINGLEUSE = 1;
+}
+
+message Source {
+  string id = 1;
+  uint32 amount = 2;
+  string clientSecret = 3;
+  uint64 created = 4;
+  string currency = 5;
+  Flow flow = 6;
+  Owner owner = 7;
+  Receiver receiver = 8;
+  string statementDescriptor = 9;
+  enum Status {
+    CANCELLED = 0;
+    CHARGEABLE = 1;
+    CONSUMNED = 2;
+    FAILED = 3;
+    PENDING = 4;
+  }
+  Status status = 10;
+  string type = 11;
+  Usage usage = 12;
+}
+
+message CreateSourceReq {
+  string type = 1;
+  uint32 amount = 2;
+  string currency = 3;
+  Owner owner = 4;
+  string statementDescriptor = 5;
+  Flow flow = 6;
+  Receiver receiver = 7;
+  Usage usage = 8;
+  message Response {Source source = 1;}
+}
+
+message UpdateSourceReq {
+  string sourceId = 1;
+  uint32 amount = 2;
+  Owner owner = 3;
+  message Response {Source source = 1;}
+}
+
+message SourceId {
+  string id = 1;
+  message Response {Source source = 1;}
+}
+
+message AttachOrDetachReq {
+  string sourceId = 1;
+  string customerId = 2;
+  message Response {Source source = 1;}
+}
+
+message Address {
+  string id = 1;
+  string number = 2;
+  string residency = 3;
+  string street = 4;
+  string city = 5;
+  string state = 6;
+  string country = 7;
+  string postalCode = 8;
+}
+
+message Owner {
+  Address address = 1;
+  string email = 2;
+  string name = 3;
+  string phone = 4;
+  Address verifiedAddress = 5;
+  string verifiedEmail = 6;
+  string verifiedName = 7;
+  string verifiedPhone = 8;
+}
+
+message Receiver {
+  string address = 1;
+  uint32 amountCharged = 2;
+  uint32 amountReceived = 3;
+  uint32 amountReturned = 4;
+  enum RefundAttributesMethod {
+    EMAIL = 0;
+    MANUAL = 1;
+    NONE = 2;
+  }
+  RefundAttributesMethod refundAttributesMethod = 5;
+  enum RefundAttributeStatus {
+    MISSING = 0;
+    REQUESTED = 1;
+    AVAILABLE = 2;
+  }
+  RefundAttributeStatus refundAttributesStatus = 6;
 }

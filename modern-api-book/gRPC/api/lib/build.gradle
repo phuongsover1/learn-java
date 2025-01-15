@@ -10,6 +10,7 @@ plugins {
     id 'java'
     id 'maven-publish'
     id "com.google.protobuf" version "0.9.4"
+
 }
 
 repositories {
@@ -26,8 +27,7 @@ dependencies {
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
     implementation "io.grpc:grpc-stub:${grpcVersion}"
     implementation "io.grpc:grpc-netty:${grpcVersion}"
-    // https://mvnrepository.com/artifact/jakarta.annotation/jakarta.annotation-api
-    implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
+    implementation 'javax.annotation:javax.annotation-api:+'
     testImplementation "org.junit.jupiter:junit-jupiter-api:+"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
 }
@@ -42,7 +42,7 @@ protobuf {
 
     }
     protoc {
-        artifact = "com.google.protobuf:protoc:4.29.2"
+        artifact = "com.google.protobuf:protoc:3+"
     }
     plugins {
         grpc {
@@ -54,6 +54,20 @@ protobuf {
             grpc { }
         }
     }
+}
+
+sourceSets {
+    main {
+        proto {
+            // In addition to the default "src/main/proto"
+            srcDir "src/main/grpc"
+        }
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier = "sources"
+    from sourceSets.main.allSource
 }
 
 publishing {

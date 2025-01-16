@@ -15,12 +15,20 @@ java {
 
 repositories {
 	mavenCentral()
+	mavenLocal()
 }
 
+def grpcVersion = '1.54.1'
 dependencies {
+	implementation 'com.packt.modern.api:payment-gateway-api:0.0.1'
+	implementation "io.grpc:grpc-protobuf: ${grpcVersion}"
+	implementation "io.grpc:grpc-stub:${grpcVersion}"
+	implementation "io.grpc:grpc-netty:${grpcVersion}"
+	implementation 'com.google.api.grpc:googleapis-common-protos:0.0.3'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation "io.grpc:grpc-testting:${grpcVersion}"
 }
 
 tasks.named('test') {

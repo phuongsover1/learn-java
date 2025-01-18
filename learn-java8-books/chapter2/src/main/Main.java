@@ -1,22 +1,22 @@
 package main;
 
-import main.behavior_parameterization.AppleFancyFormatter;
-import main.behavior_parameterization.AppleGreenColorPredicate;
-import main.behavior_parameterization.AppleHeavyWeightPredicate;
-import main.behavior_parameterization.AppleSimpleFormatter;
-import main.util.AppleUtils;
+import static main.util.AppleColor.GREEN;
 
 import java.util.List;
+import main.behavior_parameterization.AppleFancyFormatter;
+import main.behavior_parameterization.AppleSimpleFormatter;
+import main.util.Utils;
 
 public class Main {
   public static void main(String[] args) {
-    List<Apple> inventory = AppleUtils.createApples();
-    List<Apple> greenApples = AppleUtils.filterApples(inventory, new AppleGreenColorPredicate());
-    List<Apple> heavyApples = AppleUtils.filterApples(inventory, new AppleHeavyWeightPredicate());
+    List<Apple> inventory = Utils.createApples();
+    List<Apple> greenApples =
+        Utils.filter(inventory, (Apple apple) -> GREEN.name().equals(apple.getColor()));
+    List<Apple> heavyApples = Utils.filter(inventory, (Apple apple) -> apple.getWeight() > 150);
 
     System.out.println("Green apples: ");
-    AppleUtils.prettyPrintApple(greenApples, new AppleFancyFormatter());
+    Utils.prettyPrintApple(greenApples, new AppleFancyFormatter());
     System.out.println("Heavy apples: ");
-    AppleUtils.prettyPrintApple(heavyApples, new AppleSimpleFormatter());
+    Utils.prettyPrintApple(heavyApples, new AppleSimpleFormatter());
   }
 }

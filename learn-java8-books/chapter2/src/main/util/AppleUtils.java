@@ -1,6 +1,7 @@
 package main.util;
 
 import main.Apple;
+import main.behavior_parameterization.AppleFormatter;
 import main.behavior_parameterization.ApplePredicate;
 
 import java.util.ArrayList;
@@ -14,6 +15,13 @@ public class AppleUtils {
         result.add(apple);
     }
     return result;
+  }
+
+  public static void prettyPrintApple(List<Apple> inventory, AppleFormatter formatter) {
+    for (Apple apple : inventory) {
+      String output = formatter.accept(apple);
+      System.out.println(output);
+    }
   }
 
   public static List<Apple> createApples() {

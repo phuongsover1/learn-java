@@ -1,13 +1,9 @@
 package com.packt.modern.api.server.repository;
 
-import com.google.protobuf.Method;
+import com.google.protobuf.Any;
 import com.google.rpc.Code;
-import com.google.rpc.Status;
-import com.google.rpc.StatusProto;
 import com.packt.modern.api.grpc.v1.*;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.stereotype.Component;
-
+import io.grpc.protobuf.StatusProto;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -15,8 +11,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static java.lang.String.format;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.stereotype.Component;
 
 @Component
 public class DbStore {
@@ -91,6 +87,13 @@ public class DbStore {
   }
 
   public SourceId.Response retrieveSource(String sourceId) {
+    if (Strings.isBlank(sourceId)) {
+      com.google.rpc.Status status = com.google.rpc.Status.newBuilder()
+              .setCode(Code.INVALID_ARGUMENT.getNumber())
+              .setMessage("Invalid Source ID is passed.")
+              .build();
+      throw StatusProto.toStatusRuntimeException(status);
+    }
     Source source = sourceEntities.get(sourceId);
     if (Objects.isNull(source)) {
       throw io.grpc.Status.INVALID_ARGUMENT
@@ -103,9 +106,12 @@ public class DbStore {
   public AttachOrDetachReq.Response attach(AttachOrDetachReq req) {
     Source source = sourceEntities.get(req.getSourceId());
     if (Objects.isNull(source)) {
-      throw io.grpc.Status.INVALID_ARGUMENT
-          .withDescription("Requested source is not available")
-          .asRuntimeException();
+          com.google.rpc.Status status = com.google.rpc.Status.newBuilder()
+                  .setCode(Code.INVALID_ARGUMENT.getNumber())
+                  .setMessage("Requested source is not available")
+                  .addDetails(Any.pack(SourceId.Response.getDefaultInstance()))
+                  .build();
+          throw StatusProto.toStatusRuntimeException(status);
     }
     Source.Status status = source.getStatus();
     if (status.equals(Source.Status.CHARGEABLE) || status.equals(Source.Status.PENDING)) {

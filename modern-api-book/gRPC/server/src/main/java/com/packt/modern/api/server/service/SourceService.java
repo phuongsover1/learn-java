@@ -1,6 +1,7 @@
 package com.packt.modern.api.server.service;
 
 import com.packt.modern.api.grpc.v1.*;
+import com.packt.modern.api.server.exception.ExceptionUtils;
 import com.packt.modern.api.server.repository.SourceRepository;
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,13 @@ public class SourceService extends SourceServiceGrpc.SourceServiceImplBase {
 
   @Override
   public void retrieve(SourceId request, StreamObserver<SourceId.Response> responseObserver) {
-    SourceId.Response resp = repository.get(request.getId());
-    responseObserver.onNext(resp);
-    responseObserver.onCompleted();
+    try {
+      SourceId.Response resp = repository.get(request.getId());
+      responseObserver.onNext(resp);
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      ExceptionUtils.observeError(responseObserver, e, SourceId.Response.getDefaultInstance());
+    }
   }
 
   @Override

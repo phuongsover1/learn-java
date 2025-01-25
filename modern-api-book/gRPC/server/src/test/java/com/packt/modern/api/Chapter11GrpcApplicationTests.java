@@ -142,7 +142,26 @@ class ServerAppTests {
     assertEquals("USD", response.getSource().getCurrency());
   }
 
-//  @Test
-//  @DisplayName("Retrieves charges by customerId")
-//  public void ChargeService_RetrieveAllByCustomer() {}
+  @Test
+  @Order(5)
+  @DisplayName("Throw exception when empty customerId is passed")
+  public void ChargeService_RetrieveEmptyCustomerId() {
+    Throwable throwable = assertThrows(
+            StatusRuntimeException.class,
+            () -> chargeBlockingStub.retrieveAll(CustomerId.newBuilder().setId("").build())
+    );
+    assertEquals("INVALID_ARGUMENT: Invalid customerId is passed.", throwable.getMessage());
+  }
+
+  @Test
+  @Order(5)
+  @DisplayName("Retrieves created charge obj when valid customerId is passed.")
+  public void ChargeService_RetrieveValidCustomerId() {
+    CustomerId.Response response = chargeBlockingStub.retrieveAll(CustomerId.newBuilder().setId(customerId).build());
+    assertNotNull(response);
+    assertEquals(1, response.getChargeList().size());
+    assertEquals(100, response.getChargeList().get(0).getAmount());
+    assertEquals("USD", response.getChargeList().get(0).getCurrency());
+    assertEquals(customerId, response.getChargeList().get(0).getCustomerId());
+  }
 }

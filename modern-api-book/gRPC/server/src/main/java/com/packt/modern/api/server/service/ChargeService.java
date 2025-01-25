@@ -1,6 +1,7 @@
 package com.packt.modern.api.server.service;
 
 import com.packt.modern.api.grpc.v1.*;
+import com.packt.modern.api.server.exception.ExceptionUtils;
 import com.packt.modern.api.server.repository.ChargeRepository;
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,12 @@ public class ChargeService extends ChargeServiceGrpc.ChargeServiceImplBase {
 
   @Override
   public void retrieveAll(CustomerId request, StreamObserver<CustomerId.Response> responseObserver) {
-    CustomerId.Response resp = repository.retrieveAllCharges(request.getId());
-    responseObserver.onNext(resp);
-    responseObserver.onCompleted();
+    try {
+      CustomerId.Response resp = repository.retrieveAllCharges(request.getId());
+      responseObserver.onNext(resp);
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      ExceptionUtils.observeError(responseObserver, e, CustomerId.Response.getDefaultInstance());
+    }
   }
 }

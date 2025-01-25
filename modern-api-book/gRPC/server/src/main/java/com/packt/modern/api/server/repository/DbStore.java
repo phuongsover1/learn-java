@@ -220,6 +220,21 @@ public class DbStore {
     return ChargeId.Response.newBuilder().setCharge(charge).build();
   }
 
+  public CustomerId.Response retrieveAllCharges(String customerId) {
+    if (Strings.isBlank(customerId)) {
+      com.google.rpc.Status status = com.google.rpc.Status.newBuilder()
+              .setCode(Code.INVALID_ARGUMENT.getNumber())
+              .setMessage("Invalid customerId is passed.")
+              .build();
+      throw StatusProto.toStatusRuntimeException(status);
+    }
+    CustomerId.Response.Builder builder = CustomerId.Response.newBuilder();
+    chargeEntities.values().stream()
+            .filter(charge -> charge.getCustomerId().equals(customerId))
+            .forEach(builder::addCharge);
+    return builder.build();
+  }
+
   private static class RandomHolder {
     private static final Random RANDOM = new SecureRandom();
 

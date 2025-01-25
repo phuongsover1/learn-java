@@ -2,6 +2,7 @@ package com.packt.modern.api.server.repository;
 
 import com.packt.modern.api.grpc.v1.ChargeId;
 import com.packt.modern.api.grpc.v1.CreateChargeReq;
+import com.packt.modern.api.grpc.v1.CustomerId;
 import com.packt.modern.api.grpc.v1.UpdateChargeReq;
 import org.springframework.stereotype.Repository;
 
@@ -27,5 +28,11 @@ public class ChargeRepositoryImpl implements ChargeRepository {
   @Override
   public ChargeId.Response retrieve(String chargeId) {
     return dbStore.retrieveCharge(chargeId);
+  }
+
+  // TODO: Viết testcase cho phương thức này
+  @Override
+  public CustomerId.Response retrieveAllCharges(String customerId) {
+    return dbStore.retrieveAllCharges(customerId);
   }
 }

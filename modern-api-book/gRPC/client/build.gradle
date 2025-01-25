@@ -6,6 +6,7 @@ plugins {
 
 group = 'com.packt.modern.api'
 version = '0.0.1-SNAPSHOT'
+sourceCompatibility = JavaVersion.VERSION_21
 
 java {
 	toolchain {
@@ -15,9 +16,15 @@ java {
 
 repositories {
 	mavenCentral()
+	mavenLocal()
 }
 
+def grpcVersion = '1.54.1'
 dependencies {
+	implementation 'com.packt.modern.api:payment-gateway-api:0.0.1'
+	implementation "io.grpc:grpc-stub:${grpcVersion}"
+	implementation "com.google.protobuf:protobuf-java-util:3.22.2"
+
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

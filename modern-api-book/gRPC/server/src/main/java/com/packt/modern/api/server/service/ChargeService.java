@@ -1,9 +1,6 @@
 package com.packt.modern.api.server.service;
 
-import com.packt.modern.api.grpc.v1.ChargeId;
-import com.packt.modern.api.grpc.v1.ChargeServiceGrpc;
-import com.packt.modern.api.grpc.v1.CreateChargeReq;
-import com.packt.modern.api.grpc.v1.UpdateChargeReq;
+import com.packt.modern.api.grpc.v1.*;
 import com.packt.modern.api.server.repository.ChargeRepository;
 import io.grpc.stub.StreamObserver;
 import org.springframework.stereotype.Service;
@@ -33,6 +30,13 @@ public class ChargeService extends ChargeServiceGrpc.ChargeServiceImplBase {
   @Override
   public void update(UpdateChargeReq request, StreamObserver<UpdateChargeReq.Response> responseObserver) {
     UpdateChargeReq.Response resp = repository.update(request);
+    responseObserver.onNext(resp);
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void retrieveAll(CustomerId request, StreamObserver<CustomerId.Response> responseObserver) {
+    CustomerId.Response resp = repository.retrieveAllCharges(request.getId());
     responseObserver.onNext(resp);
     responseObserver.onCompleted();
   }

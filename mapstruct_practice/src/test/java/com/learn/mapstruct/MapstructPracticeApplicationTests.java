@@ -8,6 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MapstructPracticeApplicationTests {
@@ -34,6 +38,33 @@ class MapstructPracticeApplicationTests {
       SimpleSource simpleSource = simpleSourceDestinationMapper.destinationToSource(simpleDestination);
       assertEquals(simpleDestination.getName(), simpleSource.getName());
       assertEquals(simpleDestination.getDescription(), simpleSource.getDescription());
+  }
+
+  @Test
+  void givenListSourceToDestination_whenMapStruct_thenSuccess() {
+    SimpleSource simpleSource = new SimpleSource();
+    simpleSource.setName("SourceName");
+    simpleSource.setDescription("SourceDescription");
+
+    List<SimpleSource> simpleSources = List.of(simpleSource);
+    List<SimpleDestination> simpleDestinations = simpleSourceDestinationMapper.sourceListToDestinationList(simpleSources);
+
+    assertEquals(1, simpleDestinations.size());
+    assertEquals(simpleSource.getName(), simpleDestinations.get(0).getName());
+    assertEquals(simpleSource.getDescription(), simpleDestinations.get(0).getDescription());
+  }
+
+  @Test
+  void givenListDestinationToSource_whenMapStruct_thenSuccess() {
+    SimpleDestination simpleDestination = new SimpleDestination();
+    simpleDestination.setName("DestinationName");
+    simpleDestination.setDescription("DestinationDescription");
+
+    List<SimpleDestination> simpleDestinations = List.of(simpleDestination);
+    List<SimpleSource> simpleSources = simpleSourceDestinationMapper.destinationListToSourceList(simpleDestinations);
+    assertEquals(1, simpleSources.size());
+    assertEquals(simpleDestination.getName(), simpleSources.get(0).getName());
+    assertEquals(simpleDestination.getDescription(), simpleSources.get(0).getDescription());
   }
 
 }

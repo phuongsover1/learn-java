@@ -24,7 +24,9 @@ public class GrpcClientRunner implements CommandLineRunner {
             new Thread(
                 () -> {
                   try {
+                    LOG.info("Shutting down grpc client");
                     client.shutdown();
+                    LOG.info("Shut down grpc client");
                   } catch (InterruptedException e) {
                     LOG.error("Client stop with error: {}", e.getMessage());
                   }

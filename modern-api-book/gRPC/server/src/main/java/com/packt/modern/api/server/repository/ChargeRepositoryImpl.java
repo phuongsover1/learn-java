@@ -30,7 +30,6 @@ public class ChargeRepositoryImpl implements ChargeRepository {
     return dbStore.retrieveCharge(chargeId);
   }
 
-  // TODO: Viết testcase cho phương thức này
   @Override
   public CustomerId.Response retrieveAllCharges(String customerId) {
     return dbStore.retrieveAllCharges(customerId);

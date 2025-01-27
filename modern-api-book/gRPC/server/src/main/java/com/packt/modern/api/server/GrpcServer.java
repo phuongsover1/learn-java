@@ -5,6 +5,7 @@ import com.packt.modern.api.server.service.ChargeService;
 import com.packt.modern.api.server.service.SourceService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.micrometer.core.instrument.binder.grpc.ObservationGrpcServerInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,10 +25,13 @@ public class GrpcServer {
   private final SourceService sourceService;
   private final ExceptionInterceptor exceptionInterceptor;
 
-  public GrpcServer(ChargeService chargeService, SourceService sourceService, ExceptionInterceptor exceptionInterceptor) {
+  private final ObservationGrpcServerInterceptor oInterceptor;
+
+  public GrpcServer(ChargeService chargeService, SourceService sourceService, ExceptionInterceptor exceptionInterceptor, ObservationGrpcServerInterceptor oInterceptor) {
     this.chargeService = chargeService;
     this.sourceService = sourceService;
     this.exceptionInterceptor = exceptionInterceptor;
+    this.oInterceptor = oInterceptor;
   }
 
   public void start() throws IOException {
@@ -36,6 +40,7 @@ public class GrpcServer {
             .addService(sourceService)
             .addService(chargeService)
             .intercept(exceptionInterceptor)
+            .intercept(oInterceptor)
             .build().start();
     logger.info("gRPC server started and listening on port: {}", port);
     logger.info("Following server are available: ");

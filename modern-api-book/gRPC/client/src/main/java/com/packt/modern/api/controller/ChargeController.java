@@ -9,6 +9,8 @@ import com.packt.modern.api.client.GrpcClient;
 import com.packt.modern.api.grpc.v1.CustomerId;
 import com.packt.modern.api.model.Charge;
 import com.packt.modern.api.model.CustomerIdResponseDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,7 @@ import java.util.List;
 
 @RestController
 public class ChargeController {
+  private static final Logger LOG = LoggerFactory.getLogger(ChargeController.class);
   private final GrpcClient client;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -32,11 +35,13 @@ public class ChargeController {
    *         + Tạo unit test cho create, retrieve source va charge
     */
   @GetMapping("/charges")
-  public ResponseEntity<CustomerIdResponseDTO> getSources(@RequestParam String customerId) throws InvalidProtocolBufferException, JsonProcessingException {
+  public String getSources(@RequestParam String customerId) throws InvalidProtocolBufferException, JsonProcessingException {
     var req = CustomerId.newBuilder().setId(customerId).build();
     CustomerId.Response resp = client.getChargeServiceStub().retrieveAll(req);
     var printer = JsonFormat.printer().includingDefaultValueFields();
-    CustomerIdResponseDTO charges = objectMapper.readValue(printer.print(resp), CustomerIdResponseDTO.class);
-    return new ResponseEntity<>(charges, HttpStatus.OK);
+//    CustomerIdResponseDTO charges = objectMapper.readValue(printer.print(resp), CustomerIdResponseDTO.class);
+//    return new ResponseEntity<>(charges, HttpStatus.OK);
+    LOG.info("Server response received in Json format: {}", resp);
+    return printer.print(resp);
   }
 }

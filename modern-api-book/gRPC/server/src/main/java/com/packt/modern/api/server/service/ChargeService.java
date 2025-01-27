@@ -4,10 +4,13 @@ import com.packt.modern.api.grpc.v1.*;
 import com.packt.modern.api.server.exception.ExceptionUtils;
 import com.packt.modern.api.server.repository.ChargeRepository;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ChargeService extends ChargeServiceGrpc.ChargeServiceImplBase {
+  private static final Logger LOG = LoggerFactory.getLogger(ChargeService.class);
   private final ChargeRepository repository;
 
   public ChargeService(ChargeRepository repository) {
@@ -37,6 +40,7 @@ public class ChargeService extends ChargeServiceGrpc.ChargeServiceImplBase {
 
   @Override
   public void retrieveAll(CustomerId request, StreamObserver<CustomerId.Response> responseObserver) {
+    LOG.info("Retrieve All Charges of Customer: {}", request.getId());
     try {
       CustomerId.Response resp = repository.retrieveAllCharges(request.getId());
       responseObserver.onNext(resp);

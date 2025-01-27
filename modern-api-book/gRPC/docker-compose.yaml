@@ -32,6 +32,14 @@ services:
       - elasticsearch
     ports:
       - 5600:5601
+  zipkin:
+    image: ghcr.io/openzipkin/zipkin-slim:${TAG:-latest} 
+    container_name: zipkin
+    environment:
+      - STORAGE_TYPE=mem
+    ports:
+      - 9411:9411
+
 networks:
   elk-net:
     driver: bridge

@@ -36,6 +36,10 @@ public class OrderController implements OrderApi {
 
   @Override
   public ResponseEntity<List<Order>> getOrdersByCustomerId(String customerId)  {
+    if (customerId == null || customerId.isEmpty()) {
+      return ok(assembler.toModelList(oService.searchUsersOrders()));
+    }
     return  ok(assembler.toModelList(oService.getOrdersByCustomerId(customerId)));
   }
+
 }

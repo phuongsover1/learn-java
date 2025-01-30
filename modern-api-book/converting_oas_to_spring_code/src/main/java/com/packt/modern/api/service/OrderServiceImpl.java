@@ -2,6 +2,7 @@ package com.packt.modern.api.service;
 
 import com.packt.modern.api.entity.OrderEntity;
 import com.packt.modern.api.entity.ShipmentEntity;
+import com.packt.modern.api.entity.UserEntity;
 import com.packt.modern.api.exceptions.ResourceNotFoundException;
 import com.packt.modern.api.model.NewOrder;
 import com.packt.modern.api.repository.OrderRepository;
@@ -9,9 +10,7 @@ import com.packt.modern.api.repository.UserRepository;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -58,5 +57,13 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public Optional<ShipmentEntity> getShipmentByOrderId(String id) {
     return Optional.empty();
+  }
+
+  @Override
+  public Iterable<OrderEntity> searchUsersOrders() {
+   Iterable<UserEntity> userIterable =  uRepo.findAll();
+   List<UserEntity> users = new ArrayList<>();
+   userIterable.forEach(users::add);
+    return oRepo.findAllByUserEntityIsIn(users);
   }
 }

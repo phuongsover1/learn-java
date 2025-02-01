@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
 @org.springframework.stereotype.Repository
-public class InMemRepository implements Repository {
+public class InMemRepository implements Repository{
   private static final Map<String, Product> products = new ConcurrentHashMap<>();
   private static final Map<String, Tag> tags = new ConcurrentHashMap<>();
   private final Logger LOG = LoggerFactory.getLogger(getClass());

@@ -48,6 +48,7 @@ public class ProductServiceImpl implements ProductService {
       }
     }
     if (predicates.isEmpty()) {
+
       return repository.getProducts();
     }
     return repository.getProducts().stream()

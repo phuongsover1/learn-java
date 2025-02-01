@@ -48,4 +48,5 @@ generateJava {
     generateClient = true
     packageName = "com.packt.modern.api.generated"
     schemaPaths = ["${projectDir}/src/main/resources/schema"]
+    typeMapping = ["BigDecimal": "java.math.BigDecimal"]
 }

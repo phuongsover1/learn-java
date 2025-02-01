@@ -8,8 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @org.springframework.stereotype.Repository
@@ -36,7 +40,7 @@ public class InMemRepository implements Repository{
                   InMemRepository.tags.entrySet().stream()
                       .filter(t -> t.getKey().startsWith(faker.book().genre().substring(0, 1)))
                       .map(Map.Entry::getValue)
-                      .toList();
+                      .collect(Collectors.toList());
               if (tags.isEmpty()) {
                 tags.add(InMemRepository.tags.entrySet().stream().findAny().get().getValue());
               }

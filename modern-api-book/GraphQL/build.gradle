@@ -1,21 +1,13 @@
 plugins {
+    id 'org.springframework.boot' version '3.0.6'
+    id 'io.spring.dependency-management' version '1.1.0'
     id 'java'
-    id 'org.springframework.boot' version '3.4.2'
-    id 'io.spring.dependency-management' version '1.1.7'
-
-    // DGS Netflix
     id 'com.netflix.dgs.codegen' version '5.7.1'
-
 }
 
 group = 'com.packt.modern.api'
 version = '0.0.1-SNAPSHOT'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
+sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
     mavenCentral()
@@ -23,30 +15,33 @@ repositories {
 
 def dgsVersion = '6.0.5'
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-
-    // DGS Netflix
-    implementation platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:${dgsVersion}")
+    implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:${dgsVersion}"))
     implementation 'com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter'
     implementation 'com.netflix.graphql.dgs:graphql-dgs-extended-scalars'
     implementation 'com.netflix.graphql.dgs:graphql-dgs-spring-boot-micrometer'
-    runtimeOnly 'com.netflix.graphql.dgs:graphql-dgs-subscriptions-websockets-autoconfigure'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'net.datafaker:datafaker:1.9.0'
-}
+    implementation 'com.netflix.graphql.dgs:graphql-dgs-subscriptions-websockets-autoconfigure'
 
-tasks.named('test') {
-    useJUnitPlatform()
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'net.datafaker:datafaker:1.9.0'
 }
 
 generateJava {
     generateClient = true
     packageName = "com.packt.modern.api.generated"
-    schemaPaths = ["${projectDir}/src/main/resources/schema"]
     typeMapping = ["BigDecimal": "java.math.BigDecimal"]
+}
+
+test {
+    useJUnitPlatform()
+}
+
+bootJar {
+    manifest {
+        attributes 'Implementation-Version': "${version}"
+        attributes 'Implementation-Title': "${project.name}"
+        attributes 'Manifest-Version': "1.0"
+    }
 }

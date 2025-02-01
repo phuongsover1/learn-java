@@ -5,8 +5,11 @@ import com.netflix.graphql.dgs.DgsData;
 import com.netflix.graphql.dgs.InputArgument;
 import com.packt.modern.api.generated.DgsConstants;
 import com.packt.modern.api.generated.types.Product;
+import com.packt.modern.api.generated.types.ProductCriteria;
 import com.packt.modern.api.service.ProductService;
 import org.apache.logging.log4j.util.Strings;
+
+import java.util.List;
 
 @DgsComponent
 public class ProductDatafetcher {
@@ -22,5 +25,10 @@ public class ProductDatafetcher {
       new RuntimeException("Product id is required");
     }
     return productService.getProduct(id);
+  }
+
+  @DgsData(parentType = DgsConstants.QUERY_TYPE, field = DgsConstants.QUERY.Products)
+  public List<Product> getProducts(@InputArgument("filter") ProductCriteria criteria) {
+    return productService.getProducts(criteria);
   }
 }

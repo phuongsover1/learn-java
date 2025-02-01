@@ -2,6 +2,8 @@ package com.packt.modern.api.repository;
 
 import com.packt.modern.api.generated.types.Product;
 import com.packt.modern.api.generated.types.Tag;
+import com.packt.modern.api.generated.types.TagInput;
+import com.packt.modern.api.service.TagService;
 import net.datafaker.Faker;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
@@ -79,5 +81,40 @@ public class InMemRepository implements Repository {
     return products.entrySet().stream()
         .filter(entry -> productIds.contains(entry.getKey()))
         .collect(toMap(e -> e.getKey(), e -> e.getValue().getTags()));
+  }
+
+  @Override
+  public Product addTags(String productId, List<TagInput> tags) {
+    if (Objects.isNull(productId)) throw new RuntimeException("Invalid Product ID");
+    if (Strings.isBlank(productId)) throw new RuntimeException("Product ID must not be empty");
+    Product product = products.get(productId);
+    if (product == null) throw new RuntimeException("Product not found.");
+    if (tags == null || tags.isEmpty()) return product;
+
+    List<String> newTags = tags.stream().map(TagInput::getName).collect(Collectors.toList());
+    List<String> oldTags =
+        product.getTags().stream().map(Tag::getName).collect(Collectors.toList());
+    newTags.stream()
+        .forEach(
+            nt -> {
+              if (!oldTags.contains(nt)) {
+                Tag newTag = Tag.newBuilder().id(UUID.randomUUID().toString()).name(nt).build();
+                InMemRepository.tags.put(newTag.getName(), newTag);
+                product.getTags().add(newTag);
+              }
+            });
+    products.put(product.getId(), product);
+    return product;
+  }
+
+  @Override
+  public Product addQuantity(String productId, int quantity) {
+    if (productId == null || Strings.isBlank(productId))
+      throw new RuntimeException("Invalid Product ID");
+    Product product = products.get(productId);
+    if (product == null) throw new RuntimeException("Product not found.");
+    product.setCount(product.getCount() + quantity);
+    products.put(productId, product);
+    return product;
   }
 }

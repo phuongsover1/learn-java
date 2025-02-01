@@ -24,8 +24,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Product addTags(String productId, List<TagInput> tags) {
-//        return repository.addTags(productId, tags);
-        return null;
+        return repository.addTags(productId, tags);
     }
 
 }

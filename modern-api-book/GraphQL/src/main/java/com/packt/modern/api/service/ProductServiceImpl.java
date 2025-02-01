@@ -58,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public Product addQuantity(String productId, int qty) {
-    return null;
+    return repository.addQuantity(productId, qty);
   }
 
   @Override

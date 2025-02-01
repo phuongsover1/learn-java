@@ -16,8 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.toMap;
+
 @org.springframework.stereotype.Repository
-public class InMemRepository implements Repository{
+public class InMemRepository implements Repository {
   private static final Map<String, Product> products = new ConcurrentHashMap<>();
   private static final Map<String, Tag> tags = new ConcurrentHashMap<>();
   private final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -70,5 +72,12 @@ public class InMemRepository implements Repository{
   @Override
   public List<Product> getProducts() {
     return products.values().stream().toList();
+  }
+
+  @Override
+  public Map<String, List<Tag>> getProductTagMapping(List<String> productIds) {
+    return products.entrySet().stream()
+        .filter(entry -> productIds.contains(entry.getKey()))
+        .collect(toMap(e -> e.getKey(), e -> e.getValue().getTags()));
   }
 }

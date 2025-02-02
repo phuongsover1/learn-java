@@ -10,6 +10,7 @@ import com.packt.modern.api.service.ProductService;
 import com.packt.modern.api.service.TagService;
 import org.apache.logging.log4j.util.Strings;
 import org.dataloader.DataLoader;
+import org.reactivestreams.Publisher;
 import org.springframework.core.metrics.StartupStep;
 
 import java.util.List;
@@ -57,5 +58,10 @@ public class ProductDatafetcher {
   public Product addQuantity(
       @InputArgument("productId") String productId, @InputArgument("quantity") int qty) {
     return productService.addQuantity(productId, qty);
+  }
+
+  @DgsSubscription(field = DgsConstants.SUBSCRIPTION.QuantityChanged)
+  public Publisher<Product> quantityChanged() {
+    return productService.getProductPublisher();
   }
 }

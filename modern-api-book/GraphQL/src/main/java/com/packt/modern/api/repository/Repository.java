@@ -3,6 +3,7 @@ package com.packt.modern.api.repository;
 import com.packt.modern.api.generated.types.Product;
 import com.packt.modern.api.generated.types.Tag;
 import com.packt.modern.api.generated.types.TagInput;
+import org.reactivestreams.Publisher;
 
 import java.util.List;
 import java.util.Map;
@@ -13,4 +14,5 @@ public interface Repository {
     Map<String, List<Tag>> getProductTagMapping(List<String> productIds);
     Product addTags(String productId, List<TagInput> tags);
     Product addQuantity(String productId, int quantity);
+    Publisher<Product> getProductPublisher();
 }

@@ -4,6 +4,7 @@ import com.packt.modern.api.generated.types.Product;
 import com.packt.modern.api.generated.types.ProductCriteria;
 import com.packt.modern.api.repository.Repository;
 import org.apache.logging.log4j.util.Strings;
+import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public Flow.Publisher<Product> getProductPublisher() {
-    return null;
+  public Publisher<Product> getProductPublisher() {
+    return repository.getProductPublisher();
   }
 }

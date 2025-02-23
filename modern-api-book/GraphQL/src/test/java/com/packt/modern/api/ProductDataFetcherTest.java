@@ -2,6 +2,8 @@ package com.packt.modern.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.netflix.graphql.dgs.DgsQueryExecutor;
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration;
@@ -13,6 +15,7 @@ import com.packt.modern.api.repository.InMemRepository;
 import com.packt.modern.api.scalar.BigDecimalScalar;
 import com.packt.modern.api.service.ProductService;
 import com.packt.modern.api.service.TagService;
+import graphql.ExecutionResult;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,14 +54,30 @@ public class ProductDataFetcherTest {
     tags.add(Tag.newBuilder().id("tag2").name("addTags").build());
     product.setTags(tags);
     given(tagService.addTags("any", List.of(TagInput.newBuilder().name("addTags").build())))
-            .willAnswer(invocationOnMock -> product);
+        .willAnswer(invocationOnMock -> product);
   }
 
   @Test
   @DisplayName("Verify JSON returned by the query 'product'")
   public void product() {
-    String name = dgsQueryExecutor
-            .executeAndExtractJsonPath("{ product(id: \"any\") { name }}", "data.product.name");
+    String name =
+        dgsQueryExecutor.executeAndExtractJsonPath(
+            "{ product(id: \"any\") { name }}", "data.product.name");
     assertThat(name).contains("mock title");
+  }
+
+  @Test
+  @DisplayName("Verify exception to query product - invalid ID")
+  public void productWithException() {
+    // given
+    given(productService.getProduct("any")).willThrow(new RuntimeException("Invalid Product ID"));
+
+    // when
+    ExecutionResult res = dgsQueryExecutor.execute("{ product(id: \"any\") { name }}");
+    // then
+    verify(productService, times(1)).getProduct("any");
+    assertThat(res.getErrors()).isNotEmpty();
+    assertThat(res.getErrors().get(0).getMessage())
+        .isEqualTo("java.lang.RuntimeException: Invalid Product ID");
   }
 }

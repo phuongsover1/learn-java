@@ -90,9 +90,8 @@ public class InMemRepository implements Repository {
 
   @Override
   public Map<String, List<Tag>> getProductTagMapping(List<String> productIds) {
-    return products.entrySet().stream()
-        .filter(entry -> productIds.contains(entry.getKey()))
-        .collect(toMap(e -> e.getKey(), e -> e.getValue().getTags()));
+    return products.entrySet().stream().filter(e -> productIds.contains(e.getKey()))
+            .collect(toMap(Map.Entry::getKey, e -> e.getValue().getTags()));
   }
 
   @Override

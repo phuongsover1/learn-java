@@ -7,7 +7,10 @@ import static org.mockito.Mockito.verify;
 
 import com.netflix.graphql.dgs.DgsQueryExecutor;
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration;
+import com.netflix.graphql.dgs.client.codegen.GraphQLQueryRequest;
 import com.packt.modern.api.datafetchers.ProductDatafetcher;
+import com.packt.modern.api.generated.client.ProductGraphQLQuery;
+import com.packt.modern.api.generated.client.ProductProjectionRoot;
 import com.packt.modern.api.generated.types.Product;
 import com.packt.modern.api.generated.types.Tag;
 import com.packt.modern.api.generated.types.TagInput;
@@ -79,5 +82,24 @@ public class ProductDataFetcherTest {
     assertThat(res.getErrors()).isNotEmpty();
     assertThat(res.getErrors().get(0).getMessage())
         .isEqualTo("java.lang.RuntimeException: Invalid Product ID");
+  }
+
+  @Test
+  @DisplayName("Verify JSON using GraphQLQueryRequest")
+  void productsWithQueryAPI() {
+    GraphQLQueryRequest gqlRequest = new GraphQLQueryRequest(
+            ProductGraphQLQuery.newRequest().id("any").build(),
+            new ProductProjectionRoot().id().name()
+    );
+
+    String id = dgsQueryExecutor.executeAndExtractJsonPath(
+            gqlRequest.serialize(), "data.product.id"
+    );
+    String name = dgsQueryExecutor.executeAndExtractJsonPath(
+            gqlRequest.serialize(), "data.product.name"
+    );
+
+    assertThat(id).contains("any");
+    assertThat(name).contains("mock title");
   }
 }

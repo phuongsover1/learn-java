@@ -39,13 +39,14 @@ public class ProductDatafetcher {
     return productService.getProducts(criteria);
   }
 
-  @DgsData(parentType = DgsConstants.PRODUCT.TYPE_NAME, field = DgsConstants.PRODUCT.Tags)
-  public CompletableFuture<List<StartupStep.Tags>> tags(DgsDataFetchingEnvironment env) {
-    DataLoader<String, List<StartupStep.Tags>> tagsDataLoader =
-        env.getDataLoader(TagsDataLoaderWithContext.class);
-    Product product = env.getSource();
-    return tagsDataLoader.load(product.getId());
-  }
+ // Disable when testing
+//  @DgsData(parentType = DgsConstants.PRODUCT.TYPE_NAME, field = DgsConstants.PRODUCT.Tags)
+//  public CompletableFuture<List<StartupStep.Tags>> tags(DgsDataFetchingEnvironment env) {
+//    DataLoader<String, List<StartupStep.Tags>> tagsDataLoader =
+//        env.getDataLoader(TagsDataLoaderWithContext.class);
+//    Product product = env.getSource();
+//    return tagsDataLoader.load(product.getId());
+//  }
 
   @DgsMutation(field = DgsConstants.MUTATION.AddTag)
   public Product addTags(

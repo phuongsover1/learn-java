@@ -10,8 +10,8 @@ import com.netflix.graphql.dgs.DgsQueryExecutor;
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration;
 import com.netflix.graphql.dgs.client.codegen.GraphQLQueryRequest;
 import com.packt.modern.api.datafetchers.ProductDatafetcher;
-import com.packt.modern.api.dataloaders.TagDataLoader;
-import com.packt.modern.api.dataloaders.TagsDataLoaderWithContext;
+import com.packt.modern.api.generated.client.AddTagGraphQLQuery;
+import com.packt.modern.api.generated.client.AddTagProjectionRoot;
 import com.packt.modern.api.generated.client.ProductGraphQLQuery;
 import com.packt.modern.api.generated.client.ProductProjectionRoot;
 import com.packt.modern.api.generated.types.Product;
@@ -46,14 +46,20 @@ public class ProductDataFetcherTest {
   public void beforeEach() {
     List<Tag> tags = new ArrayList<>();
     tags.add(Tag.newBuilder().id("tag1").name("Tag 1").build());
-    Product product = Product.newBuilder().id("any").name("mock title")
-            .description("mock description").price(BigDecimal.valueOf(20.20)).count(100)
-            .tags(tags).build();
+    Product product =
+        Product.newBuilder()
+            .id("any")
+            .name("mock title")
+            .description("mock description")
+            .price(BigDecimal.valueOf(20.20))
+            .count(100)
+            .tags(tags)
+            .build();
     given(productService.getProduct("any")).willReturn(product);
     tags.add(Tag.newBuilder().id("tag2").name("addTags").build());
     product.setTags(tags);
     given(tagService.addTags("any", List.of(TagInput.newBuilder().name("addTags").build())))
-            .willAnswer(invocation -> product);
+        .willAnswer(invocation -> product);
   }
 
   @Test
@@ -83,17 +89,15 @@ public class ProductDataFetcherTest {
   @Test
   @DisplayName("Verify JSON using GraphQLQueryRequest")
   void productsWithQueryAPI() {
-    GraphQLQueryRequest gqlRequest = new GraphQLQueryRequest(
+    GraphQLQueryRequest gqlRequest =
+        new GraphQLQueryRequest(
             ProductGraphQLQuery.newRequest().id("any").build(),
-            new ProductProjectionRoot().id().name()
-    );
+            new ProductProjectionRoot().id().name());
 
-    String id = dgsQueryExecutor.executeAndExtractJsonPath(
-            gqlRequest.serialize(), "data.product.id"
-    );
-    String name = dgsQueryExecutor.executeAndExtractJsonPath(
-            gqlRequest.serialize(), "data.product.name"
-    );
+    String id =
+        dgsQueryExecutor.executeAndExtractJsonPath(gqlRequest.serialize(), "data.product.id");
+    String name =
+        dgsQueryExecutor.executeAndExtractJsonPath(gqlRequest.serialize(), "data.product.name");
 
     assertThat(id).contains("any");
     assertThat(name).contains("mock title");
@@ -102,20 +106,41 @@ public class ProductDataFetcherTest {
   @Test
   @DisplayName("Verify Tags returned by the query 'product'")
   void productsWithTags() {
-    GraphQLQueryRequest gqlRequest = new GraphQLQueryRequest(
+    GraphQLQueryRequest gqlRequest =
+        new GraphQLQueryRequest(
             ProductGraphQLQuery.newRequest().id("any").build(),
-            new ProductProjectionRoot().id().name().tags().id().name()
-    );
+            new ProductProjectionRoot().id().name().tags().id().name());
 
-    Product product = dgsQueryExecutor.executeAndExtractJsonPathAsObject(
-            gqlRequest.serialize(),
-            "data.product",
-            new TypeRef<>() {}
-    );
+    Product product =
+        dgsQueryExecutor.executeAndExtractJsonPathAsObject(
+            gqlRequest.serialize(), "data.product", new TypeRef<>() {});
     assertThat(product.getId()).isEqualTo("any");
     assertThat(product.getName()).isEqualTo("mock title");
     assertThat(product.getTags().size()).isEqualTo(2);
     assertThat(product.getTags().get(0).getId()).isEqualTo("tag1");
     assertThat(product.getTags().get(0).getName()).isEqualTo("Tag 1");
   }
+
+  // Testing GraphQL mutation
+  @Test
+  @DisplayName("Verify the mutation 'addTags'")
+  void addTagsMutation() {
+    GraphQLQueryRequest gqlRequest =
+        new GraphQLQueryRequest(
+            AddTagGraphQLQuery.newRequest()
+                .productId("any")
+                .tags(List.of(TagInput.newBuilder().name("addTags").build()))
+                .build(),
+            new AddTagProjectionRoot().name().count());
+    ExecutionResult res = dgsQueryExecutor.execute(gqlRequest.serialize());
+    assertThat(res.getErrors()).isEmpty();
+    verify(tagService)
+        .addTags(
+            "any",
+            List.of(
+                TagInput.newBuilder()
+                    .name("addTags")
+                    .build())); // verify certain method happened once
+  }
+
 }

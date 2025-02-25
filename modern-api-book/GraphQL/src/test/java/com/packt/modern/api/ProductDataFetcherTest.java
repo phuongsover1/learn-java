@@ -1,6 +1,8 @@
 package com.packt.modern.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,10 +12,8 @@ import com.netflix.graphql.dgs.DgsQueryExecutor;
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration;
 import com.netflix.graphql.dgs.client.codegen.GraphQLQueryRequest;
 import com.packt.modern.api.datafetchers.ProductDatafetcher;
-import com.packt.modern.api.generated.client.AddTagGraphQLQuery;
-import com.packt.modern.api.generated.client.AddTagProjectionRoot;
-import com.packt.modern.api.generated.client.ProductGraphQLQuery;
-import com.packt.modern.api.generated.client.ProductProjectionRoot;
+import com.packt.modern.api.generated.DgsConstants;
+import com.packt.modern.api.generated.client.*;
 import com.packt.modern.api.generated.types.Product;
 import com.packt.modern.api.generated.types.Tag;
 import com.packt.modern.api.generated.types.TagInput;
@@ -25,6 +25,8 @@ import graphql.ExecutionResult;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -143,4 +145,21 @@ public class ProductDataFetcherTest {
                     .build())); // verify certain method happened once
   }
 
+  @Test
+  @DisplayName("Verify the mutation 'addQuantity'")
+  void addQuantityMutation() {
+    given(productService.addQuantity("a1s2d3f4-0", TEN))
+        .willReturn(repo.addQuantity("a1s2d3f4-0", TEN));
+
+    GraphQLQueryRequest gqlRequest =
+        new GraphQLQueryRequest(
+            AddQuantityGraphQLQuery.newRequest().productId("a1s2d3f4-0").quantity(TEN).build(),
+            new AddQuantityProjectionRoot().id().count());
+    ExecutionResult res = dgsQueryExecutor.execute(gqlRequest.serialize());
+    assertThat(res.getErrors()).isEmpty();
+    Object obj = res.getData();
+    assertThat(obj).isNotNull();
+    Map<String, Object> data = (Map)((Map) res.getData()).get(DgsConstants.MUTATION.AddQuantity);
+    org.hamcrest.MatcherAssert.assertThat((Integer)data.get("count"), equalTo(TEN));
+  }
 }

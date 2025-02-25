@@ -61,7 +61,8 @@ public class InMemRepository implements Repository {
                       .id(id)
                       .name(title)
                       .description(faker.lorem().sentence())
-                      .count(faker.number().numberBetween(10, 100))
+//                      .count(faker.number().numberBetween(10, 100))
+                          .count(0) // Changed for testing addQuantity mutation
                       .price(BigDecimal.valueOf(faker.number().randomDigitNotZero()))
                       .imageUrl(String.format("/images/%s.jpeg", title.replace(" ", "")))
                       .tags(tags)

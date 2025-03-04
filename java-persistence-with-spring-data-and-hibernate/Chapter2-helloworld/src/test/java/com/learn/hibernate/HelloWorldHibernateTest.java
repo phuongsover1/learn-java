@@ -42,6 +42,7 @@ public class HelloWorldHibernateTest {
 
       CriteriaQuery<Message> criteriaQuery =
           session.getCriteriaBuilder().createQuery(Message.class);
+      criteriaQuery.from(Message.class);
 
       List<Message> messages = session.createQuery(criteriaQuery).getResultList();
       // SELECT * from MESSAGE

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 public class HelloWorldJPATest {
   @Test
-  void storeLoadMessage() {
+  public void storeLoadMessage() {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("ch02");
     try {
       EntityManager em = emf.createEntityManager();

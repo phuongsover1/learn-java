@@ -28,6 +28,7 @@ public class HelloWorldSpringDataJPATest {
 
     messageRepository.save(message);
 
+
     List<Message> messages = (List<Message>) messageRepository.findAll();
 
     assertAll(

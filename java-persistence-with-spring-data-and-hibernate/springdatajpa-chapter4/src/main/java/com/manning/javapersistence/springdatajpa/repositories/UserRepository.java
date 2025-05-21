@@ -14,7 +14,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByRegistrationDateBetween(LocalDate start, LocalDate end);
     List<User> findByUsernameAndEmail(String username, String email);
     List<User> findByUsernameOrEmail(String username, String email);
+    List<User> findByUsernameIgnoreCase(String username);
     List<User> findByLevelOrderByUsernameDesc(int level);
+    List<User> findByLevelGreaterThanEqual(int level);
     List<User> findByUsernameContaining(String text);
     List<User> findByUsernameLike(String text);
     List<User> findByUsernameStartingWith(String text);

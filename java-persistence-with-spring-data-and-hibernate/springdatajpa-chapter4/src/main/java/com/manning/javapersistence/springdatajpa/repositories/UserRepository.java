@@ -29,9 +29,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Limiting query results, sorting, and paging
     User findFirstByOrderByUsernameAsc();
-    User findTopByOrderByUsernameDesc();
+    User findTopByOrderByRegistrationDateDesc();
     Page<User> findAll(Pageable pageable);
-    List<User> findFirst2ByLevel(int level, Sort sort);
+    List<User> findFirst2ByLevel(int level, Sort sort); // by default sort is asc
     List<User> findByLevel(int level, Sort sort);
     List<User> findByActive(boolean active, Pageable pageable);
 

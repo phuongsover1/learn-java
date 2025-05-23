@@ -6,9 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.util.Streamable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -63,4 +65,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<UserProjection.UsernameOnly> findByEmailLike(String text);
 
     <T> List<T> findByLevel(int level, Class<T> type); // dùng cái này nếu như ta muốn dùng lại method này cho nhiều kiểu projection (ví dụ như là chỉ lấy mỗi mail hoặc username, hoặc có thể cả 2)
+
+    // Modifying Queries
+    @Modifying
+    @Transactional
+    @Query("update User u set u.level = :newLevel where u.level = :oldLevel")
+    int updateLevel(int oldLevel, int newLevel);
+
+    @Transactional
+    int deleteByLevel(int level);
+
+    @Modifying
+    @Transactional
+    @Query("delete from User u where u.level = ?1")
+    int deleteBulkByLevel(int level);
 }

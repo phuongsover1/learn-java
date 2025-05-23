@@ -1,6 +1,7 @@
 package com.manning.javapersistence.springdatajpa.repositories;
 
 import com.manning.javapersistence.springdatajpa.model.User;
+import com.manning.javapersistence.springdatajpa.model.UserProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -56,4 +57,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // #{#entityName} sẽ lấy tên entity dựa trên repository mà gọi method -> UserRepository<User, Long> -> Lấy User
     @Query("select u.username, LENGTH(u.email) as email_length from #{#entityName} u where u.username like %?1%")
     List<Object[]> findByAsArrayAndSort(String text, Sort sort);
+
+    // Projections
+    List<UserProjection.UserSummary> findByRegistrationDateAfter(LocalDate date);
+    List<UserProjection.UsernameOnly> findByEmailLike(String text);
+
+    <T> List<T> findByLevel(int level, Class<T> type); // dùng cái này nếu như ta muốn dùng lại method này cho nhiều kiểu projection (ví dụ như là chỉ lấy mỗi mail hoặc username, hoặc có thể cả 2)
 }

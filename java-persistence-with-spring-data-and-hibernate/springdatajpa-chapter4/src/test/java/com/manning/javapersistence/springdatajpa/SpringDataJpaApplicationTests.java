@@ -57,7 +57,7 @@ abstract class SpringDataJpaApplicationTests {
         julius.setLevel(4);
         julius.setActive(true);
 
-        User darren = new User("darren", LocalDate.of(2020, Month.DECEMBER, 11));
+        User darren = new User("darrenn", LocalDate.of(2020, Month.DECEMBER, 11));
         darren.setEmail("darren@somedomain.com");
         darren.setLevel(2);
         darren.setActive(true);

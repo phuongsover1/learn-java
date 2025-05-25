@@ -1,5 +1,6 @@
 package com.manning.javapersistence.ch06.model;
 
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
@@ -17,10 +18,12 @@ public class Item {
   @Column(name = "ITEM_DESCRIPTION")
   private String description;
 
-  @Formula(
-      "CONCAT(SUBSTR(ITEM_DESCRIPTION, 1, 12), '...')"
-  )
+  @Formula("CONCAT(SUBSTR(ITEM_DESCRIPTION, 1, 12), '...')")
   private String shortDescription;
+
+  @Column(name = "IMPERIALWEIGHT")
+  @ColumnTransformer(read = "IMPERIALWEIGHT / 2.0", write = "? * 2.0")
+  private double metricWeight;
 
   public String getName() {
     return name;
@@ -40,5 +43,13 @@ public class Item {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public double getMetricWeight() {
+    return metricWeight;
+  }
+
+  public void setMetricWeight(double metricWeight) {
+    this.metricWeight = metricWeight;
   }
 }

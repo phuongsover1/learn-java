@@ -11,8 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SpringDataConfiguration.class})
@@ -25,13 +24,16 @@ public class SpringDataTest {
   void testStoreItem() {
     Item item = new Item();
     item.setName("Test");
+    item.setDescription("This item is a new item, you should buy this new item, bla bla bla bla");
 
     itemRepository.save(item);
 
     List<Item> items = (List<Item>) itemRepository.findAll();
     assertAll(
         () -> assertEquals(1, items.size()),
-        () -> assertEquals("AUCTION: Test", items.get(0).getName())
+        () -> assertEquals("AUCTION: Test", items.get(0).getName()),
+        () -> assertEquals(15, items.get(0).getShortDescription().length()),
+        () -> assertTrue(items.get(0).getShortDescription().endsWith("..."))
     );
   }
 }

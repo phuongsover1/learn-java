@@ -5,6 +5,7 @@ import org.hibernate.annotations.*;
 import javax.persistence.*;
 import javax.persistence.AccessType;
 import javax.persistence.Entity;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,6 +42,18 @@ public class Item {
       org.hibernate.annotations.GenerationTime.INSERT
   ) // auto generated this value when inserting first time, and refresh this property value after inserting
   private BigDecimal initialPrice;
+
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private AuctionType auctionType = AuctionType.HIGHEST_BID;
+
+  public AuctionType getAuctionType() {
+    return auctionType;
+  }
+
+  public void setAuctionType(AuctionType auctionType) {
+    this.auctionType = auctionType;
+  }
 
   public String getName() {
     return name;

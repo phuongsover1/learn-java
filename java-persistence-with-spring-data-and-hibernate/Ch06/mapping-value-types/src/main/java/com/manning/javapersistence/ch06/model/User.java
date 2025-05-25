@@ -1,9 +1,6 @@
 package com.manning.javapersistence.ch06.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "USERS")
@@ -15,6 +12,21 @@ public class User {
   private String username;
   // The Address is @Embeddable, no annotation needed here ...
   private Address homeAddress;
+  @Embedded
+  @AttributeOverrides({
+    @AttributeOverride(name = "street", column = @Column(name = "BILLING_STREET")),
+    @AttributeOverride(name = "zipcode", column = @Column(name = "BILLING_ZIPCODE")),
+    @AttributeOverride(name = "city", column = @Column(name = "BILLING_CITY", nullable = false))
+  })
+  private Address billingAddress;
+
+  public Address getBillingAddress() {
+    return billingAddress;
+  }
+
+  public void setBillingAddress(Address billingAddress) {
+    this.billingAddress = billingAddress;
+  }
 
   public Address getHomeAddress() {
     return homeAddress;

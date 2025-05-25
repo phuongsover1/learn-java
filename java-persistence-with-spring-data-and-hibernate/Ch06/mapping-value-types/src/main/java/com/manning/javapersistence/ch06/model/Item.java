@@ -1,9 +1,13 @@
 package com.manning.javapersistence.ch06.model;
 
-import org.hibernate.annotations.ColumnTransformer;
-import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.AccessType;
+import javax.persistence.Entity;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class Item {
@@ -24,6 +28,19 @@ public class Item {
   @Column(name = "IMPERIALWEIGHT")
   @ColumnTransformer(read = "IMPERIALWEIGHT / 2.0", write = "? * 2.0")
   private double metricWeight;
+
+  @CreationTimestamp
+  private LocalDate createdOn;
+
+  @UpdateTimestamp
+  private LocalDateTime lastModified;
+
+  @Column(insertable = false) // will always get the default value
+  @ColumnDefault("1.00")
+  @Generated(
+      org.hibernate.annotations.GenerationTime.INSERT
+  ) // auto generated this value when inserting first time, and refresh this property value after inserting
+  private BigDecimal initialPrice;
 
   public String getName() {
     return name;
@@ -51,5 +68,17 @@ public class Item {
 
   public void setMetricWeight(double metricWeight) {
     this.metricWeight = metricWeight;
+  }
+
+  public LocalDate getCreatedOn() {
+    return createdOn;
+  }
+
+  public LocalDateTime getLastModified() {
+    return lastModified;
+  }
+
+  public BigDecimal getInitialPrice() {
+    return initialPrice;
   }
 }

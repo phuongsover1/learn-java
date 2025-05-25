@@ -13,6 +13,16 @@ public class User {
   private Long id;
 
   private String username;
+  // The Address is @Embeddable, no annotation needed here ...
+  private Address homeAddress;
+
+  public Address getHomeAddress() {
+    return homeAddress;
+  }
+
+  public void setHomeAddress(Address homeAddress) {
+    this.homeAddress = homeAddress;
+  }
 
   public Long getId() {
     return id;

@@ -1,0 +1,26 @@
+services:
+  dev:
+    image: "mcr.microsoft.com/devcontainers/java:1-17-bookworm"
+    volumes:
+      - .:/workspace:cached
+    working_dir: /workspace
+    depends_on:
+      - mysql
+    networks:
+      - devnet
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+    command: sleep infinity
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    ports:
+      - "3306:3306"
+    networks:
+      - devnet
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+networks:
+  devnet:

@@ -5,6 +5,7 @@ import org.hibernate.annotations.*;
 import javax.persistence.*;
 import javax.persistence.AccessType;
 import javax.persistence.Entity;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -38,14 +39,37 @@ public class Item {
 
   @Column(insertable = false) // will always get the default value
   @ColumnDefault("1.00")
-  @Generated(
-      org.hibernate.annotations.GenerationTime.INSERT
-  ) // auto generated this value when inserting first time, and refresh this property value after inserting
+  @Generated(org.hibernate.annotations.GenerationTime.INSERT) // auto generated this value when inserting first time,
+                                                              // and refresh this property value after inserting
   private BigDecimal initialPrice;
 
   @NotNull
   @Enumerated(EnumType.STRING)
   private AuctionType auctionType = AuctionType.HIGHEST_BID;
+
+  @Lob
+  @NotNull
+  @NotEmpty
+  private java.sql.Blob imageblob;
+
+  @Lob
+  private java.sql.Clob imageDescription;
+
+  public java.sql.Blob getImageblob() {
+    return imageblob;
+  }
+
+  public void setImageblob(java.sql.Blob imageblob) {
+    this.imageblob = imageblob;
+  }
+
+  public java.sql.Clob getImageDescription() {
+    return imageDescription;
+  }
+
+  public void setImageDescription(java.sql.Clob imageDescription) {
+    this.imageDescription = imageDescription;
+  }
 
   public AuctionType getAuctionType() {
     return auctionType;
@@ -93,5 +117,9 @@ public class Item {
 
   public BigDecimal getInitialPrice() {
     return initialPrice;
+  }
+
+  public Long getId() {
+    return id;
   }
 }

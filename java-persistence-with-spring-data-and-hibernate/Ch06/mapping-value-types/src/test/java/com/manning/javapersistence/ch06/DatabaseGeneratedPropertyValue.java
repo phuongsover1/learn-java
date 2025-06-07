@@ -24,7 +24,6 @@ public class DatabaseGeneratedPropertyValue {
       item.setDescription("Item Description");
       item.setMetricWeight(4);
 
-
       em.getTransaction().begin();
       em.persist(item);
       em.getTransaction().commit();
@@ -39,8 +38,7 @@ public class DatabaseGeneratedPropertyValue {
       em.getTransaction().commit();
       assertAll(
           () -> assertEquals(1, items.size()),
-          () -> assertEquals(4, item.getMetricWeight())
-      );
+          () -> assertEquals(4, item.getMetricWeight()));
 
       System.out.println("After update");
       System.out.println(items.get(0).getInitialPrice());

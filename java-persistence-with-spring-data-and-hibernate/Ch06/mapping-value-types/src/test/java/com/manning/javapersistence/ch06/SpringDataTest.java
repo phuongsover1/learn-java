@@ -14,7 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {SpringDataConfiguration.class})
+@ContextConfiguration(classes = { SpringDataConfiguration.class })
 public class SpringDataTest {
 
   @Autowired
@@ -33,7 +33,6 @@ public class SpringDataTest {
         () -> assertEquals(1, items.size()),
         () -> assertEquals("AUCTION: Test", items.get(0).getName()),
         () -> assertEquals(15, items.get(0).getShortDescription().length()),
-        () -> assertTrue(items.get(0).getShortDescription().endsWith("..."))
-    );
+        () -> assertTrue(items.get(0).getShortDescription().endsWith("...")));
   }
 }

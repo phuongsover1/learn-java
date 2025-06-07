@@ -16,9 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {SpringDataConfiguration.class})
+@ContextConfiguration(classes = { SpringDataConfiguration.class })
 public class MappingEnumerationTest {
-  @Autowired ItemRepository repo;
+  @Autowired
+  ItemRepository repo;
 
   @Test
   public void testMappingEnumeration() {

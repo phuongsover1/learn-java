@@ -18,40 +18,42 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {SpringDataConfiguration.class})
+@ContextConfiguration(classes = { SpringDataConfiguration.class })
 public class EmbeddableComponentTest {
-  @Autowired UserRepository userRepository;
-
-  /*@Test
-  public void testEmbeddableComponent() {
-    User user = new User();
-    user.setUsername("John");
-    Address address = new Address("test", "test", "test");
-    user.setHomeAddress(address);
-
-    userRepository.save(user);
-    List<User> users = (List<User>) userRepository.findAll();
-
-    assertAll(() -> assertEquals(address, users.get(0).getHomeAddress()));
-  }
-
-  @Test
-  void testOverrideEmbeddableAttributes() {
-    User user = new User();
-    user.setUsername("John");
-    Address homeAddress = new Address("test", "test", "test");
-    Address billingAddress = new Address("bill_test", "bill_test", "bill_test");
-    user.setHomeAddress(homeAddress);
-    user.setBillingAddress(billingAddress);
-
-    userRepository.save(user);
-
-    List<User> users = (List<User>) userRepository.findAll();
-
-    assertAll(
-        () -> assertEquals(homeAddress, users.get(0).getHomeAddress()),
-        () -> assertEquals(billingAddress, users.get(0).getBillingAddress()));
-  } */
+  @Autowired
+  UserRepository userRepository;
+  /*
+   * @Test
+   * public void testEmbeddableComponent() {
+   * User user = new User();
+   * user.setUsername("John");
+   * Address address = new Address("test", "test", "test");
+   * user.setHomeAddress(address);
+   * 
+   * userRepository.save(user);
+   * List<User> users = (List<User>) userRepository.findAll();
+   * 
+   * assertAll(() -> assertEquals(address, users.get(0).getHomeAddress()));
+   * }
+   * 
+   * @Test
+   * void testOverrideEmbeddableAttributes() {
+   * User user = new User();
+   * user.setUsername("John");
+   * Address homeAddress = new Address("test", "test", "test");
+   * Address billingAddress = new Address("bill_test", "bill_test", "bill_test");
+   * user.setHomeAddress(homeAddress);
+   * user.setBillingAddress(billingAddress);
+   * 
+   * userRepository.save(user);
+   * 
+   * List<User> users = (List<User>) userRepository.findAll();
+   * 
+   * assertAll(
+   * () -> assertEquals(homeAddress, users.get(0).getHomeAddress()),
+   * () -> assertEquals(billingAddress, users.get(0).getBillingAddress()));
+   * }
+   */
 
   @Test
   void testMappingNestedEmbeddedComponents() {
@@ -66,10 +68,9 @@ public class EmbeddableComponentTest {
 
     userRepository.save(user);
 
-    List<User> users  = (List<User>) userRepository.findAll();
+    List<User> users = (List<User>) userRepository.findAll();
     assertAll(
         () -> assertEquals(homeAddress, users.get(0).getHomeAddress()),
-        () -> assertEquals(billingAddress, users.get(0).getBillingAddress())
-    );
+        () -> assertEquals(billingAddress, users.get(0).getBillingAddress()));
   }
 }

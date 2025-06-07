@@ -34,10 +34,9 @@ public class TransformingColumnValueTest {
 
       assertAll(
           () -> assertEquals(1, items.size()),
-          () -> assertEquals(4, item.getMetricWeight())
-      );
+          () -> assertEquals(4, item.getMetricWeight()));
 
-    } finally{
+    } finally {
       em.close();
       emf.close();
     }

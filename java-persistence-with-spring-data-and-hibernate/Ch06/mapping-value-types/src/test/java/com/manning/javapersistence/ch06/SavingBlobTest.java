@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import com.manning.javapersistence.ch06.model.Item;
@@ -21,6 +22,7 @@ public class SavingBlobTest {
   Long ITEM_ID;
 
   @Test
+  @Order(1)
   void testSavingBlob() {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("ch06.mapping_value_types");
     EntityManager em = emf.createEntityManager();
@@ -60,6 +62,7 @@ public class SavingBlobTest {
   }
 
   @Test
+  @Order(2)
   void testLoadingBlob() {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("ch06.mapping_value_types");
     EntityManager em = emf.createEntityManager();

@@ -22,8 +22,10 @@ public class User {
 
     private boolean active;
 
+    private Address homeAddress;
 
-    public User() {}
+    public User() {
+    }
 
     public User(String username) {
         this.username = username;
@@ -78,18 +80,24 @@ public class User {
         this.active = active;
     }
 
+    public Address getHomeAddress() {
+        return homeAddress;
+    }
+
+    public void setHomeAddress(Address homeAddress) {
+        this.homeAddress = homeAddress;
+    }
+
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", registrationDate=" + registrationDate +
-                '}';
+        return "User [id=" + id + ", username=" + username + ", registrationDate=" + registrationDate + ", email="
+                + email + ", level=" + level + ", active=" + active + ", homeAddress=" + homeAddress + "]";
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass())
+            return false;
         User user = (User) o;
         return Objects.equals(id, user.id);
     }

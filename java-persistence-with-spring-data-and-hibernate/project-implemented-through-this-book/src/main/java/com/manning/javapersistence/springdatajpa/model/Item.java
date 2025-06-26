@@ -11,10 +11,13 @@ import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.lang.NonNull;
 
+import com.manning.javapersistence.springdatajpa.converter.MonetaryAmountConverter;
+
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -56,6 +59,11 @@ public class Item {
   @ColumnDefault("1.00")
   @Generated(org.hibernate.annotations.GenerationTime.INSERT)
   private BigDecimal initialPrice;
+
+  @NonNull
+  @Convert(converter = MonetaryAmountConverter.class)
+  @Column(name = "PRICE", length = 63)
+  private MonetaryAmount buyNowPrice;
 
   public String getName() {
     return name;
@@ -111,6 +119,14 @@ public class Item {
 
   public BigDecimal getInitialPrice() {
     return initialPrice;
+  }
+
+  public MonetaryAmount getBuyNowPrice() {
+    return buyNowPrice;
+  }
+
+  public void setBuyNowPrice(MonetaryAmount buyNowPrice) {
+    this.buyNowPrice = buyNowPrice;
   }
 
   @Override

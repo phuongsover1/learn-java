@@ -2,10 +2,14 @@ package com.manning.javapersistence.springdatajpa;
 
 import com.github.javafaker.Faker;
 import com.manning.javapersistence.springdatajpa.model.Address;
+import com.manning.javapersistence.springdatajpa.model.AutionType;
 import com.manning.javapersistence.springdatajpa.model.City;
 import com.manning.javapersistence.springdatajpa.model.GermanZipcode;
+import com.manning.javapersistence.springdatajpa.model.Item;
+import com.manning.javapersistence.springdatajpa.model.MonetaryAmount;
 import com.manning.javapersistence.springdatajpa.model.SwissZipcode;
 import com.manning.javapersistence.springdatajpa.model.User;
+import com.manning.javapersistence.springdatajpa.repositories.ItemRepository;
 import com.manning.javapersistence.springdatajpa.repositories.UserRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,10 +17,13 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -24,9 +31,13 @@ abstract class SpringDataJpaApplicationTests {
         @Autowired
         UserRepository userRepository;
 
+        @Autowired
+        ItemRepository itemRepository;
+
         @BeforeAll
         void beforeAll() {
                 userRepository.saveAll(generaUsers());
+                itemRepository.saveAll(generalItems());
         }
 
         private static List<User> generaUsers() {
@@ -125,6 +136,29 @@ abstract class SpringDataJpaApplicationTests {
                 users.add(burk);
 
                 return users;
+        }
+
+        private static List<Item> generalItems() {
+                List<Item> items = new ArrayList<>();
+                Faker faker = new Faker();
+
+                Item item1 = new Item();
+                item1.setName(faker.book().title());
+                item1.setAutionType(AutionType.FIXED_PRICE);
+                item1.setDescription(faker.lorem().sentence());
+                item1.setMetricWeight(faker.number().randomDouble(3, 0, 0));
+                item1.setBuyNowPrice(new MonetaryAmount(new BigDecimal(13), Currency.getInstance(Locale.US)));
+
+                Item item2 = new Item();
+                item2.setName(faker.book().title());
+                item2.setAutionType(AutionType.FIXED_PRICE);
+                item2.setDescription(faker.lorem().sentence());
+                item2.setMetricWeight(faker.number().randomDouble(3, 0, 0));
+                item2.setBuyNowPrice(new MonetaryAmount(new BigDecimal(13), Currency.getInstance(Locale.US)));
+
+                items.add(item1);
+                items.add(item2);
+                return items;
         }
 
         // @AfterAll

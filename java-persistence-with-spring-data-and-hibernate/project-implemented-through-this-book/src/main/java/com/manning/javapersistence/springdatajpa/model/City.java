@@ -1,6 +1,7 @@
 package com.manning.javapersistence.springdatajpa.model;
 
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
@@ -8,7 +9,8 @@ import jakarta.persistence.Embeddable;
 public class City {
   @Nonnull
   @Column(nullable = false)
-  private String zipcode;
+  // @AttributeOverride(name = "value", column = @Column(name = "ZIPCODE"))
+  private Zipcode zipcode;
 
   @Nonnull
   @Column(nullable = false)
@@ -21,17 +23,17 @@ public class City {
   public City() {
   }
 
-  public City(String zipcode, String country, String name) {
+  public City(Zipcode zipcode, String country, String name) {
     this.zipcode = zipcode;
     this.country = country;
     this.name = name;
   }
 
-  public String getZipcode() {
+  public Zipcode getZipcode() {
     return zipcode;
   }
 
-  public void setZipcode(String zipcode) {
+  public void setZipcode(Zipcode zipcode) {
     this.zipcode = zipcode;
   }
 

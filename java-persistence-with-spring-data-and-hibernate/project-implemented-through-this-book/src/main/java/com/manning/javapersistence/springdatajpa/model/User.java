@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import com.manning.javapersistence.springdatajpa.converter.ZipcodeConverter;
+
 @Entity
 @Table(name = "USERS")
 public class User {
@@ -22,6 +24,7 @@ public class User {
 
     private boolean active;
 
+    @Convert(converter = ZipcodeConverter.class, attributeName = "city.zipcode")
     private Address homeAddress;
 
     public User() {

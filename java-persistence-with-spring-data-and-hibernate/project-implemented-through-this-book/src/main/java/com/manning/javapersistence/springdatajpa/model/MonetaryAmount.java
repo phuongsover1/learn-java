@@ -3,19 +3,18 @@ package com.manning.javapersistence.springdatajpa.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Currency;
-import java.util.Locale;
 
 public class MonetaryAmount implements Serializable {
-  private final BigDecimal value;
+  private final BigDecimal amount;
   private final Currency currency;
 
-  public MonetaryAmount(BigDecimal value, Currency currency) {
-    this.value = value;
+  public MonetaryAmount(BigDecimal amount, Currency currency) {
+    this.amount = amount;
     this.currency = currency;
   }
 
-  public BigDecimal getValue() {
-    return value;
+  public BigDecimal getAmount() {
+    return amount;
   }
 
   public Currency getCurrency() {
@@ -24,7 +23,7 @@ public class MonetaryAmount implements Serializable {
 
   @Override
   public String toString() {
-    return value + " " + currency;
+    return amount + " " + currency;
   }
 
   public static MonetaryAmount fromString(String s) {
@@ -36,7 +35,7 @@ public class MonetaryAmount implements Serializable {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    result = prime * result + ((amount == null) ? 0 : amount.hashCode());
     result = prime * result + ((currency == null) ? 0 : currency.hashCode());
     return result;
   }
@@ -50,10 +49,10 @@ public class MonetaryAmount implements Serializable {
     if (getClass() != obj.getClass())
       return false;
     MonetaryAmount other = (MonetaryAmount) obj;
-    if (value == null) {
-      if (other.value != null)
+    if (amount == null) {
+      if (other.amount != null)
         return false;
-    } else if (!value.equals(other.value))
+    } else if (!amount.equals(other.amount))
       return false;
     if (currency == null) {
       if (other.currency != null)

@@ -2,8 +2,8 @@ package com.manning.javapersistence.springdatajpa.converter;
 
 import com.manning.javapersistence.springdatajpa.model.MonetaryAmount;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 @Converter
 public class MonetaryAmountConverter implements AttributeConverter<MonetaryAmount, String> {

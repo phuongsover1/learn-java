@@ -1,6 +1,7 @@
 package com.manning.javapersistence.springdatajpa;
 
 import com.github.javafaker.Faker;
+import com.manning.javapersistence.springdatajpa.configuration.SpringDataConfiguration;
 import com.manning.javapersistence.springdatajpa.model.Address;
 import com.manning.javapersistence.springdatajpa.model.AutionType;
 import com.manning.javapersistence.springdatajpa.model.City;
@@ -14,8 +15,10 @@ import com.manning.javapersistence.springdatajpa.repositories.UserRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,7 +28,8 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 
-@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {SpringDataConfiguration.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class SpringDataJpaApplicationTests {
         @Autowired
@@ -60,13 +64,13 @@ abstract class SpringDataJpaApplicationTests {
                                 new City(new SwissZipcode("1234"), faker.country().name(),
                                                 faker.address().cityName())));
 
-                // User james = new User("james", LocalDate.of(2020, Month.MARCH, 11));
-                // james.setEmail("james@someotherdomain.com");
-                // james.setLevel(3);
-                // james.setActive(false);
-                // james.setHomeAddress(new Address(faker.address().streetAddress(),
-                // new City(new SwissZipcode("123456"), faker.country().name(),
-                // faker.address().cityName())));
+                 User james = new User("james", LocalDate.of(2020, Month.MARCH, 11));
+                 james.setEmail("james@someotherdomain.com");
+                 james.setLevel(3);
+                 james.setActive(false);
+                 james.setHomeAddress(new Address(faker.address().streetAddress(),
+                 new City(new SwissZipcode("1234"), faker.country().name(),
+                 faker.address().cityName())));
 
                 User katie = new User("katie", LocalDate.of(2021, Month.JANUARY, 5));
                 katie.setEmail("katie@somedomain.com");
@@ -126,7 +130,7 @@ abstract class SpringDataJpaApplicationTests {
 
                 users.add(john);
                 users.add(mike);
-                // users.add(james);
+                 users.add(james);
                 users.add(katie);
                 users.add(beth);
                 users.add(julius);

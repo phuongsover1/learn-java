@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 
 import org.springframework.lang.NonNull;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 @Entity
 public class Bid {

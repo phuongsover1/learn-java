@@ -4,8 +4,8 @@ import com.manning.javapersistence.springdatajpa.model.GermanZipcode;
 import com.manning.javapersistence.springdatajpa.model.SwissZipcode;
 import com.manning.javapersistence.springdatajpa.model.Zipcode;
 
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 @Converter
 public class ZipcodeConverter implements AttributeConverter<Zipcode, String> {

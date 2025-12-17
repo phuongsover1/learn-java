@@ -13,16 +13,16 @@ import org.springframework.lang.NonNull;
 
 import com.manning.javapersistence.springdatajpa.converter.MonetaryAmountConverter;
 
-import jakarta.annotation.Nonnull;
-import jakarta.persistence.Access;
-import jakarta.persistence.AccessType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class Item {
@@ -34,7 +34,7 @@ public class Item {
   @Column(name = "ITEM_NAME")
   private String name;
 
-  @Nonnull
+  @NotNull
   @Column(name = "ITEM_DESCRIPTION")
   private String description;
 

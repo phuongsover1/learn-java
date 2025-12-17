@@ -1,22 +1,22 @@
 package com.manning.javapersistence.springdatajpa.model;
 
-import jakarta.annotation.Nonnull;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
+import javax.persistence.AttributeOverride;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 
 @Embeddable
 public class City {
-  @Nonnull
+  @NotNull
   @Column(nullable = false)
   // @AttributeOverride(name = "value", column = @Column(name = "ZIPCODE"))
   private Zipcode zipcode;
 
-  @Nonnull
+  @NotNull
   @Column(nullable = false)
   private String country;
 
-  @Nonnull
+  @NotNull
   @Column(nullable = false)
   private String name;
 

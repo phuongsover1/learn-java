@@ -1,9 +1,11 @@
 package com.manning.persistence.ch07.model;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 @Entity
+@DiscriminatorValue("BA")
 public class BankAccount extends BillingDetails{
     @NotNull
     private String account;

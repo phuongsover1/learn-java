@@ -2,10 +2,12 @@ package com.manning.persistence.ch07.model;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 @Entity
+@DiscriminatorValue("CC")
 @AttributeOverride(
         name = "owner",
         column = @Column(name = "CC_OWNER", nullable = false)

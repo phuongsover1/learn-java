@@ -3,6 +3,7 @@ package com.manning.persistence;
 import com.manning.persistence.ch07.model.BankAccount;
 import com.manning.persistence.ch07.model.CreditCard;
 import com.manning.persistence.ch07.repositories.BankAccountRepository;
+import com.manning.persistence.ch07.repositories.BillingDetailsRepository;
 import com.manning.persistence.ch07.repositories.CreditCardRepository;
 import com.manning.persistence.configuration.SpringDataConfiguration;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,9 @@ public class MappingInheritanceSpringDataJPATest {
 
     @Autowired
     private BankAccountRepository bankAccountRepository;
+
+    @Autowired
+    private BillingDetailsRepository billingDetailsRepository;
 
     @Test
     void storeLoadEntities() {
@@ -53,5 +57,10 @@ public class MappingInheritanceSpringDataJPATest {
                 () -> assertEquals(1, bankAccounts1.size()),
                 () -> assertEquals("Mike Johnson", bankAccounts1.get(0).getOwner())
         );
+    }
+
+    @Test
+    void testFindAll_billingDetailsRepository() {
+       billingDetailsRepository.findAll();
     }
 }

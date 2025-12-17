@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.orm.jpa.JpaSystemException;
 
 import com.github.javafaker.Faker;
-import com.manning.javapersistence.springdatajpa.SpringdatajpaChapter4Application;
 import com.manning.javapersistence.springdatajpa.model.Address;
 import com.manning.javapersistence.springdatajpa.model.City;
 import com.manning.javapersistence.springdatajpa.model.GermanZipcode;

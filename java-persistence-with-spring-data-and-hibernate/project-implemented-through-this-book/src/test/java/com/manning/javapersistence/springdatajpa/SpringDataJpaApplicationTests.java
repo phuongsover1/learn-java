@@ -12,21 +12,18 @@ import com.manning.javapersistence.springdatajpa.model.SwissZipcode;
 import com.manning.javapersistence.springdatajpa.model.User;
 import com.manning.javapersistence.springdatajpa.repositories.ItemRepository;
 import com.manning.javapersistence.springdatajpa.repositories.UserRepository;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
-import java.util.Locale;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SpringDataConfiguration.class})
@@ -151,14 +148,16 @@ abstract class SpringDataJpaApplicationTests {
                 item1.setAutionType(AutionType.FIXED_PRICE);
                 item1.setDescription(faker.lorem().sentence());
                 item1.setMetricWeight(faker.number().randomDouble(3, 0, 0));
-                item1.setBuyNowPrice(new MonetaryAmount(new BigDecimal(13), Currency.getInstance(Locale.US)));
+                item1.setBuyNowPrice(new MonetaryAmount(new BigDecimal(1.1), Currency.getInstance("USD")));
+                item1.setInitialPrice(new MonetaryAmount(new BigDecimal(1.0), Currency.getInstance("EUR")));
 
                 Item item2 = new Item();
                 item2.setName(faker.book().title());
                 item2.setAutionType(AutionType.FIXED_PRICE);
                 item2.setDescription(faker.lorem().sentence());
                 item2.setMetricWeight(faker.number().randomDouble(3, 0, 0));
-                item2.setBuyNowPrice(new MonetaryAmount(new BigDecimal(13), Currency.getInstance(Locale.US)));
+                item2.setBuyNowPrice(new MonetaryAmount(new BigDecimal(2.2), Currency.getInstance("USD")));
+                item2.setInitialPrice(new MonetaryAmount(new BigDecimal(2.0), Currency.getInstance("EUR")));
 
                 items.add(item1);
                 items.add(item2);

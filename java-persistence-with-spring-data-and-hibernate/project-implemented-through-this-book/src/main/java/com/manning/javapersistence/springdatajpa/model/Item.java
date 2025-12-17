@@ -1,18 +1,8 @@
 package com.manning.javapersistence.springdatajpa.model;
 
+import com.manning.javapersistence.springdatajpa.converter.MonetaryAmountConverter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.ColumnTransformer;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Formula;
-import org.hibernate.annotations.Generated;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.lang.NonNull;
-
-import com.manning.javapersistence.springdatajpa.converter.MonetaryAmountConverter;
-
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -23,6 +13,11 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.lang.NonNull;
 
 @Entity
 public class Item {
@@ -49,20 +44,26 @@ public class Item {
   @ColumnTransformer(read = "IMPERIALWEIGHT / 2.0", write = "? * 2.0")
   private double metricWeight;
 
-  @CreationTimestamp
-  private LocalDate createdOn;
+  @CreationTimestamp private LocalDate createdOn;
 
-  @UpdateTimestamp
-  private LocalDate lastModified;
+  @UpdateTimestamp private LocalDate lastModified;
 
-  @Column(insertable = false)
-  @ColumnDefault("1.00")
-  @Generated(org.hibernate.annotations.GenerationTime.INSERT)
-  private BigDecimal initialPrice;
+  @NotNull
+  @org.hibernate.annotations.Type(type = "monetary_amount_eur")
+  @org.hibernate.annotations.Columns(
+      columns = {
+        @Column(name = "INITIALPRICE_AMOUNT"),
+        @Column(name = "INITIALPRICE_CURRENCY", length = 3)
+      })
+  private MonetaryAmount initialPrice;
 
-  @NonNull
-  @Convert(converter = MonetaryAmountConverter.class)
-  @Column(name = "PRICE", length = 63)
+  @NotNull
+  @org.hibernate.annotations.Type(type = "monetary_amount_usd")
+  @org.hibernate.annotations.Columns(
+          columns = {
+                  @Column(name = "BUYNOWPRICE_AMOUNT"),
+                  @Column(name = "BUYNOWPRICE_CURRENCY", length = 3)
+          })
   private MonetaryAmount buyNowPrice;
 
   public String getName() {
@@ -117,16 +118,20 @@ public class Item {
     return lastModified;
   }
 
-  public BigDecimal getInitialPrice() {
-    return initialPrice;
-  }
-
   public MonetaryAmount getBuyNowPrice() {
     return buyNowPrice;
   }
 
   public void setBuyNowPrice(MonetaryAmount buyNowPrice) {
     this.buyNowPrice = buyNowPrice;
+  }
+
+  public MonetaryAmount getInitialPrice() {
+    return initialPrice;
+  }
+
+  public void setInitialPrice(MonetaryAmount initialPrice) {
+    this.initialPrice = initialPrice;
   }
 
   @Override
@@ -149,53 +154,36 @@ public class Item {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     Item other = (Item) obj;
     if (id == null) {
-      if (other.id != null)
-        return false;
-    } else if (!id.equals(other.id))
-      return false;
+      if (other.id != null) return false;
+    } else if (!id.equals(other.id)) return false;
     if (name == null) {
-      if (other.name != null)
-        return false;
-    } else if (!name.equals(other.name))
-      return false;
+      if (other.name != null) return false;
+    } else if (!name.equals(other.name)) return false;
     if (description == null) {
-      if (other.description != null)
-        return false;
-    } else if (!description.equals(other.description))
-      return false;
-    if (autionType != other.autionType)
-      return false;
+      if (other.description != null) return false;
+    } else if (!description.equals(other.description)) return false;
+    if (autionType != other.autionType) return false;
     if (shortDescription == null) {
-      if (other.shortDescription != null)
-        return false;
-    } else if (!shortDescription.equals(other.shortDescription))
-      return false;
+      if (other.shortDescription != null) return false;
+    } else if (!shortDescription.equals(other.shortDescription)) return false;
     if (Double.doubleToLongBits(metricWeight) != Double.doubleToLongBits(other.metricWeight))
       return false;
     if (createdOn == null) {
-      if (other.createdOn != null)
-        return false;
-    } else if (!createdOn.equals(other.createdOn))
-      return false;
+      if (other.createdOn != null) return false;
+    } else if (!createdOn.equals(other.createdOn)) return false;
     if (lastModified == null) {
-      if (other.lastModified != null)
-        return false;
-    } else if (!lastModified.equals(other.lastModified))
-      return false;
+      if (other.lastModified != null) return false;
+    } else if (!lastModified.equals(other.lastModified)) return false;
     if (initialPrice == null) {
-      if (other.initialPrice != null)
-        return false;
-    } else if (!initialPrice.equals(other.initialPrice))
-      return false;
+      if (other.initialPrice != null) return false;
+    } else if (!initialPrice.equals(other.initialPrice)) return false;
     return true;
   }
+
 
 }

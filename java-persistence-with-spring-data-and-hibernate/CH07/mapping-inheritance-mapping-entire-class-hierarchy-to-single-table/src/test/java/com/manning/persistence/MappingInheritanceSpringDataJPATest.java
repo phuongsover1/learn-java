@@ -60,7 +60,12 @@ public class MappingInheritanceSpringDataJPATest {
     }
 
     @Test
-    void testFindAll_billingDetailsRepository() {
+    void testCH07_MappingEntireClassHierarchy_To_SingleTable__BillingDetailsRepository() {
        billingDetailsRepository.findAll();
+    }
+
+    @Test
+    void testCH07_MappingEntireClassHierarchy_To_SingleTable__CreditCardRepository() {
+        creditCardRepository.findAll();
     }
 }

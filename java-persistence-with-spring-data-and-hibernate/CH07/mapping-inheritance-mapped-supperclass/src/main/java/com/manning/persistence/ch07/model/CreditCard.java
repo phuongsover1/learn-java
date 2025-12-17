@@ -20,6 +20,17 @@ public class CreditCard extends BillingDetails {
     @NotNull
     private String expYear;
 
+    public CreditCard(String owner, String cardNumber, String expMonth, String expYear) {
+        super(owner);
+        this.cardNumber = cardNumber;
+        this.expMonth = expMonth;
+        this.expYear = expYear;
+    }
+
+    public CreditCard() {
+        super();
+    }
+
     public String getCardNumber() {
         return cardNumber;
     }

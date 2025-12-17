@@ -14,6 +14,15 @@ public class BankAccount extends BillingDetails{
     @NotNull
     private String swift;
 
+    public BankAccount() {}
+
+    public BankAccount(String owner, String account, String bankName, String swift) {
+        super(owner);
+        this.account = account;
+        this.bankName = bankName;
+        this.swift = swift;
+    }
+
     public String getAccount() {
         return account;
     }

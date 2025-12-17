@@ -14,6 +14,12 @@ public class BillingDetails {
     @NotNull
     private String owner;
 
+    public BillingDetails() {}
+
+    public BillingDetails(String owner) {
+        this.owner = owner;
+    }
+
     public Long getId() {
         return id;
     }

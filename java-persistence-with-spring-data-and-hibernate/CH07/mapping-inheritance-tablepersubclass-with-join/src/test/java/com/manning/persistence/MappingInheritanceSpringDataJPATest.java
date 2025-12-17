@@ -60,7 +60,17 @@ public class MappingInheritanceSpringDataJPATest {
     }
 
     @Test
-    void testFindAll_billingDetailsRepository() {
-       billingDetailsRepository.findAll();
+    void testCH07_MappingTablePerSubclass_With_Join__BillingDetailsRepository() {
+        billingDetailsRepository.findAll();
+    }
+
+    @Test
+    void testCH07_MappingTablePerSubclass_With_Join__CreditCardRepository() {
+        creditCardRepository.findAll();
+    }
+
+    @Test
+    void testCH07_MappingTablePerSubclass_With_Join__BankAccountRepository() {
+        bankAccountRepository.findAll();
     }
 }

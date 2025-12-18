@@ -11,11 +11,13 @@ public abstract class BillingDetails {
     private Long id;
 
     @NotNull
-    private String owner;
+    @ManyToOne
+    private User owner;
+
 
     public BillingDetails() {}
 
-    public BillingDetails(String owner) {
+    public BillingDetails(User owner) {
         this.owner = owner;
     }
 
@@ -27,11 +29,11 @@ public abstract class BillingDetails {
         this.id = id;
     }
 
-    public String getOwner() {
+    public User getOwner() {
         return owner;
     }
 
-    public void setOwner(String owner) {
+    public void setOwner(User owner) {
         this.owner = owner;
     }
 

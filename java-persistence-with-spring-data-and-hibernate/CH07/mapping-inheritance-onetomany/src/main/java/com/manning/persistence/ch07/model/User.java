@@ -2,6 +2,8 @@ package com.manning.persistence.ch07.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "USERS")
@@ -9,8 +11,8 @@ public class User {
     @Id
     @GeneratedValue(generator = "ID_GENERATOR")
     private Long id;
-    @ManyToOne
-    private BillingDetails defaultBilling;
+    @OneToMany(mappedBy = "owner")
+    private Set<BillingDetails> billingDetails = new HashSet<>();
 
     @NotNull
     private String name;
@@ -31,11 +33,12 @@ public class User {
         this.id = id;
     }
 
-    public BillingDetails getDefaultBilling() {
-        return defaultBilling;
+
+    public Set<BillingDetails> getBillingDetails() {
+        return billingDetails;
     }
 
-    public void setDefaultBilling(BillingDetails defaultBilling) {
-        this.defaultBilling = defaultBilling;
+    public void setBillingDetails(Set<BillingDetails> billingDetails) {
+        this.billingDetails = billingDetails;
     }
 }

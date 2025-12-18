@@ -16,6 +16,11 @@ public class BankAccount extends BillingDetails{
 
     public BankAccount() {}
 
+    @Override
+    public void pay(int amount) {
+        System.out.println("Paying from a bank account the amount of " + amount);
+    }
+
     public BankAccount(String owner, String account, String bankName, String swift) {
         super(owner);
         this.account = account;

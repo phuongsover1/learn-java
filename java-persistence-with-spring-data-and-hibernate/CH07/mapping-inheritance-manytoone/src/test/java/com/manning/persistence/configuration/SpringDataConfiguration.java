@@ -46,6 +46,8 @@ public class SpringDataConfiguration {
         localContainerEntityManagerFactoryBean.setDataSource(dataSource());
         Properties properties = new Properties();
         properties.put("hibernate.hbm2ddl.auto", "create");
+        properties.put("hibernate.format_sql", "true");
+        properties.put("hibernate.highlight_sql", "true"); // Tùy chọn
         localContainerEntityManagerFactoryBean.setJpaProperties(properties);
         localContainerEntityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter());
         localContainerEntityManagerFactoryBean.setPackagesToScan("com.manning.persistence.ch07");

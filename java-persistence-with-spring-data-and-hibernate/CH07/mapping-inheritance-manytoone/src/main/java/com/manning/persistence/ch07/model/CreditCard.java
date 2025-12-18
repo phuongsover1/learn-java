@@ -3,6 +3,7 @@ package com.manning.persistence.ch07.model;
 import javax.persistence.AttributeOverride;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull;
         name = "owner",
         column = @Column(name = "CC_OWNER", nullable = false)
 )
+@PrimaryKeyJoinColumn(name = "CREDITCARD_ID")
 public class CreditCard extends BillingDetails {
     @NotNull
     private String cardNumber;
@@ -53,5 +55,10 @@ public class CreditCard extends BillingDetails {
 
     public void setExpYear(String expYear) {
         this.expYear = expYear;
+    }
+
+    @Override
+    public void pay(int amount) {
+        System.out.println("Paying from a credit card the amount of " + amount);
     }
 }

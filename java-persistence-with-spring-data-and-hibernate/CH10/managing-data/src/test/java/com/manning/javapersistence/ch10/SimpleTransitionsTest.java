@@ -262,5 +262,59 @@ public class SimpleTransitionsTest {
         em.close();
     }
 
+    @Test
+    void refresh() throws ExecutionException, InterruptedException {
+       EntityManager em = emf.createEntityManager();
+       em.getTransaction().begin();
+       Item someItem = new Item();
+       someItem.setName("Some Item");
+       em.persist(someItem);
+       em.getTransaction().commit();
+       em.close();
+       Long ITEM_ID = someItem.getId();
+
+       em = emf.createEntityManager();
+       em.getTransaction().begin();
+
+       Item item = em.find(Item.class, ITEM_ID);
+
+       // Someone updates this row in the databbase!
+        Executors.newSingleThreadExecutor().submit(() -> {
+            EntityManager em1 = emf.createEntityManager();
+            try {
+                em1.getTransaction().begin();
+
+                Session session = em1.unwrap(Session.class);
+                session.doWork(con -> {
+                    Item item1 = em1.find(Item.class, ITEM_ID);
+                    item1.setName("Concurrent Update Name");
+                    em1.persist(item1);
+                });
+
+                em1.getTransaction().commit();
+                em1.close();
+            } catch (Exception ex) {
+                throw new RuntimeException("Concurrent operation failure: " + ex, ex);
+            }
+            return null;
+        }).get();
+
+        /*
+        * The `em.refresh(item)` at line 302 ensures that the `item` entity is synchronized with the database.
+        * However, the transaction is still active, and the persistence context is managing the entity.
+        * The actual database state is not fully committed or visible until the transaction is committed at line 303.
+
+        At line 305, after the transaction is committed, the second `em.refresh(item)` ensures that the `item` entity reflects the most up-to-date state from the database.
+        *  This is necessary because the database changes made by the concurrent thread (e.g., "Concurrent Update Name") become visible only after the transaction is committed.
+        *
+        * */
+        em.refresh(item);
+        em.getTransaction().commit(); // Flush: Dirty check with snapshot and SQL UPDATE
+
+        em.refresh(item); // Database changes are now visible after commit
+        em.close();
+        assertEquals("Concurrent Update Name", item.getName());
+    }
+
 
 }

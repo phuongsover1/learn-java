@@ -39,5 +39,29 @@ import java.util.concurrent.Executors;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleTransitionsTest {
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("ch10");
 
+    @Test
+    void makePersistent() {
+        Item item = new Item();
+        item.setName("Some Item");
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            em.persist(item);
+
+            Long ITEM_ID = item.getId();
+
+            em.getTransaction().commit();
+
+        } catch (Exception ex) {
+            em.getTransaction().rollback();
+        } finally{
+          if (em != null && em.isOpen())
+              em.close();
+        }
+
+    }
 }

@@ -44,24 +44,22 @@ public class SimpleTransitionsTest {
     @Test
     void makePersistent() {
         Item item = new Item();
-        item.setName("Some Item");
+        item.setName("Some Item"); // Item#name is NOT NULL
 
-        EntityManager em = emf.createEntityManager();
-        try {
-            em.getTransaction().begin();
+        EntityManager em = emf.createEntityManager(); // Application-managed
+        em.getTransaction().begin();
 
-            em.persist(item);
+        em.persist(item);
 
-            Long ITEM_ID = item.getId();
+        Long ITEM_ID = item.getId();
 
-            em.getTransaction().commit();
+        em.getTransaction().commit();
+        em.close();
 
-        } catch (Exception ex) {
-            em.getTransaction().rollback();
-        } finally{
-          if (em != null && em.isOpen())
-              em.close();
-        }
-
+        em = emf.createEntityManager();
+        em.getTransaction().begin();
+        assertEquals("Some Item", em.find(Item.class, ITEM_ID).getName());
+        em.getTransaction().commit();;
+        em.close();
     }
 }

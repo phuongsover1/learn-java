@@ -62,4 +62,47 @@ public class SimpleTransitionsTest {
         em.getTransaction().commit();;
         em.close();
     }
+
+    @Test
+    void retrievePersistent() {
+        EntityManager em = emf.createEntityManager(); // Application-managed
+        em.getTransaction().begin();
+        Item someItem = new Item();
+        someItem.setName("Some Item");
+        em.persist(someItem);
+        em.getTransaction().commit();
+        em.close();
+        Long ITEM_ID = someItem.getId();
+
+        {
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+            // Hit the database if not already in persistence context
+            Item item = em.find(Item.class, ITEM_ID);
+            if (item != null)
+                item.setName("New Name");
+            em.getTransaction().commit(); // Flush: Dirty check with snapshot and SQL UPDATE
+            em.close();
+        }
+
+        {
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+
+            Item itemA = em.find(Item.class, ITEM_ID);
+            Item itemB = em.find(Item.class, ITEM_ID); // No DB hit, already in persistence context
+
+            assertTrue(itemA == itemB);
+            assertTrue(itemA.equals(itemB));
+            assertTrue(itemA.getId().equals(itemB.getId()));
+            em.getTransaction().commit();
+            em.close();
+        }
+
+        em = emf.createEntityManager();
+        em.getTransaction().begin();
+        assertEquals("New Name", em.find(Item.class, ITEM_ID).getName());
+        em.getTransaction().commit();
+        em.close();
+    }
 }

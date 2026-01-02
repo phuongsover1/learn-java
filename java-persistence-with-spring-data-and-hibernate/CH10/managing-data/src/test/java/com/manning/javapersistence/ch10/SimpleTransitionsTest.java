@@ -21,6 +21,7 @@
 package com.manning.javapersistence.ch10;
 
 import org.hibernate.LazyInitializationException;
+import org.hibernate.ReplicationMode;
 import org.hibernate.Session;
 import org.junit.jupiter.api.Test;
 
@@ -40,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleTransitionsTest {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("ch10");
+    EntityManagerFactory emf2 = Persistence.createEntityManagerFactory("ch10_replicate");
 
     @Test
     void makePersistent() {
@@ -316,5 +318,42 @@ public class SimpleTransitionsTest {
         assertEquals("Concurrent Update Name", item.getName());
     }
 
+    @Test
+    void replicate() {
+       Long ITEM_ID;
+       EntityManager em = emf.createEntityManager();
+       em.getTransaction().begin();
+       Item someItem = new Item();
+       someItem.setName("Some Item");
+       em.persist(someItem);
+       em.getTransaction().commit();
+       em.close();
+       ITEM_ID = someItem.getId();
+
+       EntityManager emA = getDatabaseA().createEntityManager();
+       emA.getTransaction().begin();
+       Item item = emA.find(Item.class, ITEM_ID);
+       emA.getTransaction().commit();
+       emA.close();
+
+       EntityManager emB = getDatabaseB().createEntityManager();
+       emB.getTransaction().begin();
+       emB.unwrap(Session.class)
+                       .replicate(item, ReplicationMode.LATEST_VERSION);
+       Item item1 = emB.find(Item.class, ITEM_ID);
+       assertEquals("Some Item", item1.getName());
+       emB.getTransaction().commit();
+       emB.close();
+
+
+    }
+
+    EntityManagerFactory getDatabaseA() {
+        return emf;
+    }
+
+    EntityManagerFactory getDatabaseB() {
+        return emf2;
+    }
 
 }

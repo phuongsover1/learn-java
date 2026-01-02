@@ -356,4 +356,56 @@ public class SimpleTransitionsTest {
         return emf2;
     }
 
+    @Test
+    void flushModeType() {
+      Item someItem = new Item();
+      someItem.setName("Original Name");
+     EntityManager em = emf.createEntityManager();
+     em.getTransaction().begin();
+     em.persist(someItem);
+     em.getTransaction().commit();
+     em.close();
+
+     Long ITEM_ID = someItem.getId();
+
+//      {
+//        em = emf.createEntityManager();
+//        em.getTransaction().begin();
+//
+//        Item item = em.find(Item.class, ITEM_ID);
+//        item.setName("New Name");
+//
+//        // Hibernate automatically synchronizes the persistence context with the database when using FlushModeType.AUTO (default)
+//        // and using em.createQuery(), but in the database the old value is still there until commit
+//        assertEquals("New Name", em.createQuery("select i.name from Item i where i.id = :id", String.class)
+//            .setParameter("id", ITEM_ID)
+//            .getSingleResult()
+//        );
+//
+//        em.getTransaction().commit(); // Flush: Dirty check with snapshot and SQL UPDATE
+//        em.close();
+//      }
+      {
+        em = emf.createEntityManager();
+        em.getTransaction().begin();
+
+        Item item = em.find(Item.class, ITEM_ID);
+        item.setName("New Name");
+
+        em.setFlushMode(FlushModeType.COMMIT);
+
+        // With FlushModeType.COMMIT, the persistence context is not synchronized with the database until commit
+        assertEquals("Original Name", em.createQuery("select i.name from Item i where i.id = :id", String.class)
+            .setParameter("id", ITEM_ID)
+            .getSingleResult()
+        );
+
+        em.getTransaction().commit(); // Flush !
+        em.close();
+      }
+
+
+
+    }
+
 }

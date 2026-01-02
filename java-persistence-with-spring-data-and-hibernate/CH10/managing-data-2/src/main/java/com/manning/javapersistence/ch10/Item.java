@@ -25,54 +25,80 @@ import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Item {
 
-    @Id
-    @GeneratedValue(generator = "ID_GENERATOR")
-    private Long id;
+  @Id
+  @GeneratedValue(generator = "ID_GENERATOR")
+  private Long id;
 
-    public Long getId() { // Optional but useful
-        return id;
-    }
+  public Item(String name, LocalDate auctionEnd, User seller) {
+    this.name = name;
+    this.auctionEnd = auctionEnd;
+    this.seller = seller;
+  }
 
-    @NotNull
-    @Size(
-        min = 2,
-        max = 255,
-        message = "Name is required, maximum 255 characters."
-    )
-    private String name;
+  public Long getId() { // Optional but useful
+    return id;
+  }
 
-    @Future
-    private Date auctionEnd;
+  @NotNull
+  @Size(min = 2, max = 255, message = "Name is required, maximum 255 characters.")
+  private String name;
 
-    private BigDecimal buyNowPrice;
+  @Future private LocalDate auctionEnd;
 
-    public String getName() {
-        return name;
-    }
+  private BigDecimal buyNowPrice;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  @NotNull
+  @ManyToOne(fetch = FetchType.LAZY)
+  private User seller;
 
-    public Date getAuctionEnd() {
-        return auctionEnd;
-    }
+  @OneToMany(mappedBy = "item")
+  private Set<Bid> bids = new HashSet<>();
 
-    public void setAuctionEnd(Date auctionEnd) {
-        this.auctionEnd = auctionEnd;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public BigDecimal getBuyNowPrice() {
-        return buyNowPrice;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public void setBuyNowPrice(BigDecimal buyNowPrice) {
-        this.buyNowPrice = buyNowPrice;
-    }
+  public BigDecimal getBuyNowPrice() {
+    return buyNowPrice;
+  }
 
+  public void setBuyNowPrice(BigDecimal buyNowPrice) {
+    this.buyNowPrice = buyNowPrice;
+  }
+
+  public LocalDate getAuctionEnd() {
+    return auctionEnd;
+  }
+
+  public void setAuctionEnd(LocalDate auctionEnd) {
+    this.auctionEnd = auctionEnd;
+  }
+
+  public User getSeller() {
+    return seller;
+  }
+
+  public void setSeller(User seller) {
+    this.seller = seller;
+  }
+
+  public Set<Bid> getBids() {
+    return bids;
+  }
+
+  public void addBid(Bid bid) {
+    bids.add(bid);
+  }
 }

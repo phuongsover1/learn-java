@@ -43,6 +43,9 @@ public class Item {
     this.seller = seller;
   }
 
+  public Item() {
+  }
+
   public Long getId() { // Optional but useful
     return id;
   }

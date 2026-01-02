@@ -1,12 +1,10 @@
 package com.manning.javapersistence.ch10;
 
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
+@Entity
 public class Bid {
 
   @Id

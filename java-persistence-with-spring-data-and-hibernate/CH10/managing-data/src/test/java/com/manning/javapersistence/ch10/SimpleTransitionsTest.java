@@ -451,4 +451,70 @@ public class SimpleTransitionsTest {
 
     }
 
+    @Test
+  void detach() {
+      EntityManager em = emf.createEntityManager();
+      em.getTransaction().begin();
+
+      User someUser = new User();
+      someUser.setUsername("johndoe");
+      someUser.setHomeAddress(new Address("Some Street", "1234", "Some City"));
+      em.persist(someUser);
+      em.getTransaction().commit();
+      em.close();
+      Long USER_ID = someUser.getId();
+
+      em = emf.createEntityManager();
+      em.getTransaction().begin();
+
+      User user = em.find(User.class, USER_ID);
+      em.detach(user);
+      assertFalse(em.contains(user));
+
+      em.getTransaction().commit();
+      em.close();
+  }
+
+  @Test
+  void mergeDetached() {
+    EntityManager em = emf.createEntityManager();
+    em.getTransaction().begin();
+
+    User someUser = new User();
+    someUser.setUsername("johndoe");
+    someUser.setHomeAddress(new Address("Some Street", "1234", "Some City"));
+    em.persist(someUser);
+    em.getTransaction().commit();
+    em.close();
+    Long USER_ID = someUser.getId();
+
+    em = emf.createEntityManager();
+    em.getTransaction().begin();
+
+    User user = em.find(User.class, USER_ID);
+    em.detach(user);
+    assertFalse(em.contains(user));
+
+    em.getTransaction().commit();
+    em.close();
+
+    user.setUsername("Will be merged");
+
+    em = emf.createEntityManager();
+    em.getTransaction().begin();
+    User mergedUser = em.merge(user);
+    assertTrue(em.contains(mergedUser));
+
+    em.getTransaction().commit();
+    em.close();
+
+    em = emf.createEntityManager();
+    em.getTransaction().begin();
+
+    User foundUser = em.find(User.class, USER_ID);
+    assertEquals("Will be merged", foundUser.getUsername());
+
+    em.getTransaction().commit();
+    em.close();
+  }
 }

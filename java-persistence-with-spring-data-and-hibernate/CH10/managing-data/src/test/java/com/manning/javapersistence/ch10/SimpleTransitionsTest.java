@@ -403,6 +403,49 @@ public class SimpleTransitionsTest {
         em.getTransaction().commit(); // Flush !
         em.close();
       }
+    }
+
+    @Test
+    void scopeOfIdentity() {
+      EntityManager em = emf.createEntityManager();
+      em.getTransaction().begin();
+      Item someItem = new Item();
+      someItem.setName("Some Item");
+      em.persist(someItem);
+      em.getTransaction().commit();
+      em.close();
+      Long ITEM_ID = someItem.getId();
+
+      em = emf.createEntityManager();
+      em.getTransaction().begin();
+
+      Item a = em.find(Item.class, ITEM_ID);
+      Item b = em.find(Item.class, ITEM_ID);
+
+      assertTrue(a == b);
+      assertTrue(a.equals(b));
+      assertEquals(a.getId(), b.getId());
+
+      em.getTransaction().commit();
+      em.close();
+      // Persistence context is gone, 'a' and 'b' are now references to instances in detached state
+
+      em = emf.createEntityManager();
+      em.getTransaction().begin();
+
+      Item c = em.find(Item.class, ITEM_ID);
+      assertTrue(a != c);
+      assertFalse(a.equals(c));
+      assertEquals(a.getId(), c.getId());
+
+      em.getTransaction().commit();
+      em.close();
+
+      Set<Item> allItems = new HashSet<>();
+      allItems.add(a);
+      allItems.add(b);
+      allItems.add(c);
+      assertEquals(2, allItems.size()); // that seems wrong and arbitrary
 
 
 

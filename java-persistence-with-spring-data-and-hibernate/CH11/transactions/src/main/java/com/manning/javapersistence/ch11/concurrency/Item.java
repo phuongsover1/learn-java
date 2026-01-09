@@ -32,6 +32,9 @@ public class Item {
     @GeneratedValue(generator = Constants.ID_GENERATOR)
     private Long id;
 
+    @Version
+    private long version;
+
     @NotNull
     private String name;
 
@@ -75,4 +78,7 @@ public class Item {
         this.category = category;
     }
 
+  public long getVersion() {
+    return version;
+  }
 }

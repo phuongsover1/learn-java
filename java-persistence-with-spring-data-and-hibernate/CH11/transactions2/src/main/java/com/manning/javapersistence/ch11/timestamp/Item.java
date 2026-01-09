@@ -36,6 +36,9 @@ public class Item {
     @GeneratedValue(generator = Constants.ID_GENERATOR)
     private Long id;
 
+    @Version
+    private LocalDateTime lastUpdated;
+
     @NotNull
     private String name;
 
@@ -50,7 +53,11 @@ public class Item {
         return id;
     }
 
-    public String getName() {
+  public LocalDateTime getLastUpdated() {
+    return lastUpdated;
+  }
+
+  public String getName() {
         return name;
     }
 

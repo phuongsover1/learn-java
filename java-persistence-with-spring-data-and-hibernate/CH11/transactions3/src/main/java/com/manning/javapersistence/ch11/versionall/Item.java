@@ -21,6 +21,7 @@
 package com.manning.javapersistence.ch11.versionall;
 
 import com.manning.javapersistence.ch11.Constants;
+import org.hibernate.annotations.OptimisticLockType;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -28,6 +29,10 @@ import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
 @Entity
+@org.hibernate.annotations.OptimisticLocking(
+    type = OptimisticLockType.ALL
+)
+@org.hibernate.annotations.DynamicUpdate
 public class Item {
 
     @Id

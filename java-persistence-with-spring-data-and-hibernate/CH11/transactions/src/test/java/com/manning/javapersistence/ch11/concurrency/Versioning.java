@@ -125,11 +125,11 @@ public class Versioning {
               .getResultList();
       for (Item item : items) {
         totalPrice = totalPrice.add(item.getBuyNowPrice());
-        // Will trigger an optimistic lock check at transaction commit time
+
 //        if (item.getId().equals(testData.items.getFirstId())) {
 //          item.setBuyNowPrice(BigDecimal.valueOf(1));
+//        }
         }
-      }
 
 
       // Now a concurrent transaction will move an item to another category

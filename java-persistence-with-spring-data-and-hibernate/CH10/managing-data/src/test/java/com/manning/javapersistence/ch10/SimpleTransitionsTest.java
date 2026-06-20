@@ -23,6 +23,7 @@ package com.manning.javapersistence.ch10;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.ReplicationMode;
 import org.hibernate.Session;
+import org.hibernate.TransactionException;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.EntityManager;
@@ -30,7 +31,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceUnitUtil;
-import javax.persistence.RollbackException;
 import javax.validation.ConstraintViolationException;
 
 import java.util.HashSet;
@@ -413,6 +413,111 @@ public class SimpleTransitionsTest {
     }
 
     @Test
+    void flushSynchronizesSqlButDoesNotCommitTransaction() {
+        deleteAllItemRows();
+
+        EntityManager em = emf.createEntityManager();
+        Long ITEM_ID = null;
+        try {
+            em.getTransaction().begin();
+
+            Item item = new Item();
+            item.setName("Flushed But Not Committed");
+            em.persist(item);
+            ITEM_ID = item.getId();
+            assertNotNull(ITEM_ID);
+
+            em.flush();
+
+            /*
+               flush() sends the pending INSERT/UPDATE/DELETE SQL to the database now, but the transaction
+               is still open. Because the transaction is still open, rollback can still undo the SQL.
+             */
+            assertTrue(em.getTransaction().isActive());
+            assertEquals(1, countItemRowsWithJdbc(em, ITEM_ID));
+
+            em.getTransaction().rollback();
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
+
+        assertEquals(0, countItemRowsById(ITEM_ID));
+    }
+
+    @Test
+    void commitFinishesUnitOfWorkAndMakesChangesPermanent() {
+        deleteAllItemRows();
+
+        EntityManager em = emf.createEntityManager();
+        Long ITEM_ID = null;
+        try {
+            em.getTransaction().begin();
+
+            Item item = new Item();
+            item.setName("Committed Name");
+            em.persist(item);
+            ITEM_ID = item.getId();
+            assertNotNull(ITEM_ID);
+
+            /*
+               commit() also flushes pending changes, then ends the transaction. Use commit when the complete
+               unit of work succeeded and the database changes should become permanent.
+             */
+            em.getTransaction().commit();
+
+            assertFalse(em.getTransaction().isActive());
+            assertThrows(TransactionException.class, () -> {
+                em.getTransaction().rollback();
+            });
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
+
+        assertEquals(1, countItemRowsById(ITEM_ID));
+        assertEquals("Committed Name", findItemName(ITEM_ID));
+    }
+
+    @Test
+    void useFlushBeforeJdbcWorkThatDependsOnPendingEntityChanges() {
+        deleteAllItemRows();
+
+        EntityManager em = emf.createEntityManager();
+        Long ITEM_ID = null;
+        try {
+            em.getTransaction().begin();
+
+            Item item = new Item();
+            item.setName("Needed By JDBC");
+            em.persist(item);
+            ITEM_ID = item.getId();
+            assertNotNull(ITEM_ID);
+
+            /*
+               Raw JDBC work does not know about Hibernate's persistence context. If the JDBC code needs
+               pending entity changes, flush first so the SQL has reached the database transaction.
+             */
+            assertEquals(0, countItemRowsWithJdbc(em, ITEM_ID));
+
+            em.flush();
+
+            assertEquals(1, countItemRowsWithJdbc(em, ITEM_ID));
+
+            // The JDBC code could now safely use the row, but we can still roll everything back.
+            em.getTransaction().rollback();
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
+
+        assertEquals(0, countItemRowsById(ITEM_ID));
+    }
+
+    @Test
     void flushModeAutoFlushesBeforeOverlappingQuery() {
         deleteAllItemRows();
         Long ITEM_ID = persistItem("Original Name");
@@ -604,6 +709,36 @@ public class SimpleTransitionsTest {
                 em.getTransaction().rollback();
             em.close();
         }
+    }
+
+    private Long countItemRowsById(Long itemId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            Long count = em.createQuery("select count(i) from Item i where i.id = :id", Long.class)
+                .setParameter("id", itemId)
+                .getSingleResult();
+            em.getTransaction().commit();
+            return count;
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
+    }
+
+    private int countItemRowsWithJdbc(EntityManager em, Long itemId) {
+        return em.unwrap(Session.class).doReturningWork(connection -> {
+            try (java.sql.PreparedStatement statement =
+                     connection.prepareStatement("select count(*) from Item where id = ?")) {
+                statement.setLong(1, itemId);
+
+                try (java.sql.ResultSet resultSet = statement.executeQuery()) {
+                    resultSet.next();
+                    return resultSet.getInt(1);
+                }
+            }
+        });
     }
 
     @Test

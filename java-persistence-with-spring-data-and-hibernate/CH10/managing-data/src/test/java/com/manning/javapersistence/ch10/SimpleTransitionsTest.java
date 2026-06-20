@@ -320,6 +320,8 @@ public class SimpleTransitionsTest {
 
     @Test
     void refreshOverwritesUnsavedChanges() throws ExecutionException, InterruptedException {
+        deleteAllRows();
+
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
         Item someItem = new Item();
@@ -355,6 +357,19 @@ public class SimpleTransitionsTest {
 
         em.getTransaction().commit();
         em.close();
+    }
+
+    private void deleteAllRows() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.createNativeQuery("SET FOREIGN_KEY_CHECKS = 0").executeUpdate();
+            em.createNativeQuery("DELETE FROM Item").executeUpdate();
+            em.createNativeQuery("SET FOREIGN_KEY_CHECKS = 1").executeUpdate();
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
     }
 
     @Test

@@ -319,6 +319,45 @@ public class SimpleTransitionsTest {
     }
 
     @Test
+    void refreshOverwritesUnsavedChanges() throws ExecutionException, InterruptedException {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Item someItem = new Item();
+        someItem.setName("Database Name");
+        em.persist(someItem);
+        em.getTransaction().commit();
+        em.close();
+        Long ITEM_ID = someItem.getId();
+
+        em = emf.createEntityManager();
+
+        Item item = em.find(Item.class, ITEM_ID);
+        item.setName("Unsaved Local Name");
+        assertEquals("Unsaved Local Name", item.getName());
+
+        Executors.newSingleThreadExecutor().submit(() -> {
+            EntityManager em1 = emf.createEntityManager();
+            try {
+                em1.getTransaction().begin();
+                Item sameItem = em1.find(Item.class, ITEM_ID);
+                sameItem.setName("Async Database Name");
+                em1.getTransaction().commit();
+            } finally {
+                em1.close();
+            }
+            return null;
+        }).get();
+
+        // refresh() reloads from the database and discards the unsaved local change.
+        em.getTransaction().begin();
+        em.refresh(item);
+        assertEquals("Async Database Name", item.getName());
+
+        em.getTransaction().commit();
+        em.close();
+    }
+
+    @Test
     void replicate() {
        Long ITEM_ID;
        EntityManager em = emf.createEntityManager();

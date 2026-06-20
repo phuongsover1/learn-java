@@ -30,6 +30,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceUnitUtil;
+import javax.persistence.RollbackException;
+import javax.validation.ConstraintViolationException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -320,7 +322,7 @@ public class SimpleTransitionsTest {
 
     @Test
     void refreshOverwritesUnsavedChanges() throws ExecutionException, InterruptedException {
-        deleteAllRows();
+        deleteAllItemRows();
 
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
@@ -359,7 +361,7 @@ public class SimpleTransitionsTest {
         em.close();
     }
 
-    private void deleteAllRows() {
+    private void deleteAllItemRows() {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
@@ -411,52 +413,197 @@ public class SimpleTransitionsTest {
     }
 
     @Test
-    void flushModeType() {
-      Item someItem = new Item();
-      someItem.setName("Original Name");
-     EntityManager em = emf.createEntityManager();
-     em.getTransaction().begin();
-     em.persist(someItem);
-     em.getTransaction().commit();
-     em.close();
+    void flushModeAutoFlushesBeforeOverlappingQuery() {
+        deleteAllItemRows();
+        Long ITEM_ID = persistItem("Original Name");
 
-     Long ITEM_ID = someItem.getId();
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
 
-//      {
-//        em = emf.createEntityManager();
-//        em.getTransaction().begin();
-//
-//        Item item = em.find(Item.class, ITEM_ID);
-//        item.setName("New Name");
-//
-//        // Hibernate automatically synchronizes the persistence context with the database when using FlushModeType.AUTO (default)
-//        // and using em.createQuery(), but in the database the old value is still there until commit
-//        assertEquals("New Name", em.createQuery("select i.name from Item i where i.id = :id", String.class)
-//            .setParameter("id", ITEM_ID)
-//            .getSingleResult()
-//        );
-//
-//        em.getTransaction().commit(); // Flush: Dirty check with snapshot and SQL UPDATE
-//        em.close();
-//      }
-      {
-        em = emf.createEntityManager();
-        em.getTransaction().begin();
+            Item item = em.find(Item.class, ITEM_ID);
+            item.setName("Auto Flushed Name");
 
-        Item item = em.find(Item.class, ITEM_ID);
-        item.setName("New Name");
+            assertEquals(FlushModeType.AUTO, em.getFlushMode());
 
-        em.setFlushMode(FlushModeType.COMMIT);
+            /*
+               AUTO is the default. Before Hibernate runs this Item query, it flushes pending Item changes
+               so the query result is consistent with the current persistence context.
+             */
+            assertEquals("Auto Flushed Name", em.createQuery("select i.name from Item i where i.id = :id", String.class)
+                .setParameter("id", ITEM_ID)
+                .getSingleResult()
+            );
 
-        // With FlushModeType.COMMIT, the persistence context is not synchronized with the database until commit
-        assertEquals("Original Name", em.createQuery("select i.name from Item i where i.id = :id", String.class)
-            .setParameter("id", ITEM_ID)
-            .getSingleResult()
-        );
+            em.getTransaction().rollback();
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
 
-        em.getTransaction().commit(); // Flush !
-        em.close();
-      }
+        // Flush sends SQL to the database, but it is still part of the transaction and can be rolled back.
+        assertEquals("Original Name", findItemName(ITEM_ID));
+    }
+
+    @Test
+    void flushModeCommitDefersFlushUntilTransactionCommit() {
+        deleteAllItemRows();
+        Long ITEM_ID = persistItem("Original Name");
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.setFlushMode(FlushModeType.COMMIT);
+
+            Item item = em.find(Item.class, ITEM_ID);
+            item.setName("Commit Flushed Name");
+
+            /*
+               COMMIT tells Hibernate not to flush before this query. The managed entity is changed in memory,
+               but the query still reads the old database row.
+             */
+            assertEquals("Original Name", em.createQuery("select i.name from Item i where i.id = :id", String.class)
+                .setParameter("id", ITEM_ID)
+                .getSingleResult()
+            );
+
+            em.getTransaction().commit(); // The dirty Item is flushed here.
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
+
+        assertEquals("Commit Flushed Name", findItemName(ITEM_ID));
+    }
+
+    @Test
+    void flushModeCommitCanBeFlushedManuallyBeforeQuery() {
+        deleteAllItemRows();
+        Long ITEM_ID = persistItem("Original Name");
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.setFlushMode(FlushModeType.COMMIT);
+
+            Item item = em.find(Item.class, ITEM_ID);
+            item.setName("Manual Flush Name");
+
+            em.flush();
+
+            assertEquals("Manual Flush Name", em.createQuery("select i.name from Item i where i.id = :id", String.class)
+                .setParameter("id", ITEM_ID)
+                .getSingleResult()
+            );
+
+            em.getTransaction().rollback();
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
+
+        // Manual flush does not mean commit; the flushed UPDATE was rolled back.
+        assertEquals("Original Name", findItemName(ITEM_ID));
+    }
+
+    @Test
+    void flushModeCommitDelaysValidationFailureUntilCommit() {
+        deleteAllItemRows();
+        Long ITEM_ID = persistItem("Original Name");
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.setFlushMode(FlushModeType.COMMIT); // With FlushModeType.COMMIT, the persistence context is not synchronized with the database until commit
+
+            Item item = em.find(Item.class, ITEM_ID);
+            item.setName("X"); // Invalid: Item#name has @Size(min = 2)
+
+            /*
+               This simulates a common production surprise: with COMMIT mode, code can keep running with an
+               invalid pending change because queries do not necessarily trigger the flush that validates it.
+             */
+            assertEquals("Original Name", em.createQuery("select i.name from Item i where i.id = :id", String.class)
+                .setParameter("id", ITEM_ID)
+                .getSingleResult()
+            );
+
+            assertThrows(ConstraintViolationException.class, () -> {
+                em.flush(); // The delayed flush finally validates the entity and fails.
+            });
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
+
+        assertEquals("Original Name", findItemName(ITEM_ID));
+    }
+
+    @Test
+    void persistWithInvalidNameFailsWhenPersistenceContextFlushes() {
+        deleteAllItemRows();
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            Item item = new Item();
+            item.setName("X"); // Invalid: Item#name has @Size(min = 2)
+
+            /*
+               persist() only makes the entity managed. Hibernate still has not synchronized the INSERT
+               with the database, so Bean Validation has not rejected the entity yet.
+             */
+            assertDoesNotThrow(() -> {
+                em.persist(item);
+            });
+
+            ConstraintViolationException failure = assertThrows(ConstraintViolationException.class, () -> {
+                em.flush(); // Flush triggers Bean Validation before executing the INSERT.
+            });
+
+            assertEquals(1, failure.getConstraintViolations().size());
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
+    }
+
+    private Long persistItem(String name) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            Item someItem = new Item();
+            someItem.setName(name);
+            em.persist(someItem);
+            em.getTransaction().commit();
+            return someItem.getId();
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
+    }
+
+    private String findItemName(Long itemId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            String name = em.createQuery("select i.name from Item i where i.id = :id", String.class)
+                .setParameter("id", itemId)
+                .getSingleResult();
+            em.getTransaction().commit();
+            return name;
+        } finally {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            em.close();
+        }
     }
 
     @Test

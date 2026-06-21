@@ -14,8 +14,10 @@
 
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
 
-            <property name="hibernate.show_sql" value="true"/>
+            <!-- Route SQL through SLF4J (logback-test.xml); show_sql bypasses the logger -->
+            <property name="hibernate.show_sql" value="false"/>
             <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
             <property name="hibernate.use_identifier_rollback" value="true"/>
 
             <property name="hibernate.hbm2ddl.auto" value="create"/>

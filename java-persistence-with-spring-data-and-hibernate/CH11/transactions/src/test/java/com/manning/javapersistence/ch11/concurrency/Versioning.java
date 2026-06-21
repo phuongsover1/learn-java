@@ -104,6 +104,76 @@ public class Versioning {
   }
 
   @Test
+  void lostUpdateWithBulkUpdateThatBypassesVersionCheck()
+      throws ExecutionException, InterruptedException {
+    EntityManager em = emf.createEntityManager();
+    em.getTransaction().begin();
+
+    Item item = new Item("Some Item");
+    item.setBuyNowPrice(new BigDecimal("10.00"));
+    em.persist(item);
+    em.getTransaction().commit();
+    em.close();
+    final Long ITEM_ID = item.getId();
+
+    EntityManager em1 = emf.createEntityManager();
+    em1.getTransaction().begin();
+
+    /*
+       Transaction 1 reads the current price and calculates a new value from it.
+       It does not lock the row, so another transaction can still update the same
+       row before transaction 1 writes its calculated value.
+    */
+    BigDecimal transaction1Price =
+        em1.find(Item.class, ITEM_ID).getBuyNowPrice();
+    BigDecimal transaction1NewPrice = transaction1Price.add(new BigDecimal("3.00"));
+
+    Executors.newSingleThreadExecutor()
+        .submit(
+            () -> {
+              EntityManager em2 = emf.createEntityManager();
+              em2.getTransaction().begin();
+
+              BigDecimal transaction2Price =
+                  em2.find(Item.class, ITEM_ID).getBuyNowPrice();
+              BigDecimal transaction2NewPrice = transaction2Price.add(new BigDecimal("5.00"));
+
+              /*
+                 Bulk JPQL UPDATE queries bypass optimistic version checking. This
+                 update writes 15.00, but it does not change the VERSION column.
+              */
+              em2.createQuery("update Item i set i.buyNowPrice = :price where i.id = :id")
+                  .setParameter("price", transaction2NewPrice)
+                  .setParameter("id", ITEM_ID)
+                  .executeUpdate();
+
+              em2.getTransaction().commit();
+              em2.close();
+              return null;
+            })
+        .get();
+
+    /*
+       Transaction 1 still writes the value it calculated from the old price:
+       10.00 + 3.00 = 13.00. The concurrent 5.00 increase is lost.
+    */
+    em1.createQuery("update Item i set i.buyNowPrice = :price where i.id = :id")
+        .setParameter("price", transaction1NewPrice)
+        .setParameter("id", ITEM_ID)
+        .executeUpdate();
+    em1.getTransaction().commit();
+    em1.close();
+
+    em = emf.createEntityManager();
+    em.getTransaction().begin();
+    BigDecimal finalPrice = em.find(Item.class, ITEM_ID).getBuyNowPrice();
+    em.getTransaction().commit();
+    em.close();
+
+    assertEquals(0, finalPrice.compareTo(new BigDecimal("13.00")));
+  }
+
+  @Test
   void manualVersionChecking() throws ExecutionException, InterruptedException {
     final ConcurrencyTestData testData = storeCategoriesAndItems();
     Long[] CATEGORIES = testData.categories.identifiers;
@@ -181,5 +251,90 @@ public class Versioning {
     em.close();
 
     assertEquals(2, allItemsFirstCategory.size());
+  }
+
+  @Test
+  void forceIncrement() throws ExecutionException, InterruptedException, InvalidBidException {
+    TestData testData = storeItemAndBids();
+    Long ITEM_ID = testData.getFirstId();
+
+    EntityManager em = emf.createEntityManager();
+    em.getTransaction().begin();
+
+    /*
+       The <code>find()</code> method accepts a <code>LockModeType</code>. The
+       <code>OPTIMISTIC_FORCE_INCREMENT</code> mode tells Hibernate that the version
+       of the retrieved <code>Item</code> should be incremented after loading,
+       even if it's never modified in the unit of work.
+    */
+    Item item = em.find(Item.class, ITEM_ID, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+    Bid highestBid = queryHighestBid(em, item);
+
+    Executors.newSingleThreadExecutor()
+        .submit(
+            () -> {
+              try {
+                EntityManager em1 = emf.createEntityManager();
+                em1.getTransaction().begin();
+
+                Item item1 = em1.find(Item.class, ITEM_ID, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+                Bid highestBid1 = queryHighestBid(em1, item1);
+
+                Bid newBid = new Bid(new BigDecimal("44.44"), item1, highestBid1);
+
+                em1.persist(newBid);
+
+                em1.getTransaction().commit();
+                em1.close();
+              } catch (InvalidBidException e) {
+                throw new RuntimeException(e);
+              } catch (Exception ex) {
+                // This should not happen, this commit should win!
+                throw new RuntimeException("Concurrent operation failure: " + ex, ex);
+              }
+            })
+        .get();
+    Bid newBid = new Bid(new BigDecimal("44.40"), item, highestBid);
+    em.persist(newBid);
+
+    /*
+        When flushing the persistence context, Hibernate will execute an
+        <code>INSERT</code> for the new <code>Bid</code> and force an
+        <code>UPDATE</code> of the <code>Item</code> with a version check.
+        If someone modified the <code>Item</code> concurrently, or placed a
+        <code>Bid</code> concurrently with this procedure, Hibernate throws
+        an exception.
+    */
+    assertThrows(RollbackException.class, () -> em.getTransaction().commit());
+    em.close();
+  }
+
+  private Bid queryHighestBid(EntityManager em, Item item) {
+    try {
+      return em.createQuery(
+              "select b from Bid b where b.item = :item order by b.amount desc", Bid.class)
+          .setParameter("item", item)
+          .setMaxResults(1)
+          .getSingleResult();
+
+    } catch (NoResultException ex) {
+      return null;
+    }
+  }
+
+  private TestData storeItemAndBids() {
+    EntityManager em = emf.createEntityManager();
+    em.getTransaction().begin();
+    Long[] ids = new Long[1];
+    Item item = new Item("Some Item");
+    em.persist(item);
+    ids[0] = item.getId();
+    for (int i = 1; i <= 3; i++) {
+      Bid bid = new Bid(new BigDecimal(10 + i), item);
+      em.persist(bid);
+    }
+    em.getTransaction().commit();
+    em.close();
+    return new TestData(ids);
   }
 }

@@ -6,8 +6,10 @@ import javax.persistence.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -50,20 +52,21 @@ public class Versioning {
     em.getTransaction().commit();
     em.close();
     final Long ITEM_ID = someItem.getId();
-
+    CountDownLatch writerCommitted = new CountDownLatch(1);
     EntityManager em1 = emf.createEntityManager();
     em1.getTransaction().begin();
 
     /*
-       Retrieving an entity instance by identifier loads the current version from the
-       database with a <code>SELECT</code>.
-    */
+     * Retrieving an entity instance by identifier loads the current version from
+     * the
+     * database with a <code>SELECT</code>.
+     */
     Item item = em1.find(Item.class, ITEM_ID);
     // select * from ITEM where ID = ?
 
     /*
-       The current version of the <code>Item</code> instance is 0.
-    */
+     * The current version of the <code>Item</code> instance is 0.
+     */
     assertEquals(0L, item.getVersion());
 
     item.setName("New Name");
@@ -82,6 +85,7 @@ public class Versioning {
                 item1.setName("Other Name");
 
                 em2.getTransaction().commit();
+                writerCommitted.countDown();
                 // update ITEM set NAME = ?, VERSION = 1 where ID = ? and VERSION = 0
                 // This succeeds, there is a row with ID = ? and VERSION = 0 in the database!
                 em2.close();
@@ -92,13 +96,13 @@ public class Versioning {
               return null;
             })
         .get();
-
+    writerCommitted.await(5, TimeUnit.SECONDS);
     /*
-       When the persistence context is flushed Hibernate will detect the dirty
-       <code>Item</code> instance and increment its version to 1. The SQL
-       <code>UPDATE</code> now performs the version check, storing the new version
-       in the database, but only if the database version is still 0.
-    */
+     * When the persistence context is flushed Hibernate will detect the dirty
+     * <code>Item</code> instance and increment its version to 1. The SQL
+     * <code>UPDATE</code> now performs the version check, storing the new version
+     * in the database, but only if the database version is still 0.
+     */
     assertThrows(OptimisticLockException.class, () -> em1.flush());
     // update ITEM set NAME = ?, VERSION = 1 where ID = ? and VERSION = 0
   }
@@ -120,12 +124,11 @@ public class Versioning {
     em1.getTransaction().begin();
 
     /*
-       Transaction 1 reads the current price and calculates a new value from it.
-       It does not lock the row, so another transaction can still update the same
-       row before transaction 1 writes its calculated value.
-    */
-    BigDecimal transaction1Price =
-        em1.find(Item.class, ITEM_ID).getBuyNowPrice();
+     * Transaction 1 reads the current price and calculates a new value from it.
+     * It does not lock the row, so another transaction can still update the same
+     * row before transaction 1 writes its calculated value.
+     */
+    BigDecimal transaction1Price = em1.find(Item.class, ITEM_ID).getBuyNowPrice();
     BigDecimal transaction1NewPrice = transaction1Price.add(new BigDecimal("3.00"));
 
     Executors.newSingleThreadExecutor()
@@ -134,14 +137,13 @@ public class Versioning {
               EntityManager em2 = emf.createEntityManager();
               em2.getTransaction().begin();
 
-              BigDecimal transaction2Price =
-                  em2.find(Item.class, ITEM_ID).getBuyNowPrice();
+              BigDecimal transaction2Price = em2.find(Item.class, ITEM_ID).getBuyNowPrice();
               BigDecimal transaction2NewPrice = transaction2Price.add(new BigDecimal("5.00"));
 
               /*
-                 Bulk JPQL UPDATE queries bypass optimistic version checking. This
-                 update writes 15.00, but it does not change the VERSION column.
-              */
+               * Bulk JPQL UPDATE queries bypass optimistic version checking. This
+               * update writes 15.00, but it does not change the VERSION column.
+               */
               em2.createQuery("update Item i set i.buyNowPrice = :price where i.id = :id")
                   .setParameter("price", transaction2NewPrice)
                   .setParameter("id", ITEM_ID)
@@ -154,9 +156,9 @@ public class Versioning {
         .get();
 
     /*
-       Transaction 1 still writes the value it calculated from the old price:
-       10.00 + 3.00 = 13.00. The concurrent 5.00 increase is lost.
-    */
+     * Transaction 1 still writes the value it calculated from the old price:
+     * 10.00 + 3.00 = 13.00. The concurrent 5.00 increase is lost.
+     */
     em1.createQuery("update Item i set i.buyNowPrice = :price where i.id = :id")
         .setParameter("price", transaction1NewPrice)
         .setParameter("id", ITEM_ID)
@@ -184,23 +186,21 @@ public class Versioning {
     BigDecimal totalPrice = BigDecimal.ZERO;
     for (Long categoryId : CATEGORIES) {
       /*
-        For each <code>Category</code>, query all <code>Item</code> instances with
-        an <code>OPTIMISTIC</code> lock mode. Hibernate now knows it has to
-        check each <code>Item</code> at flush time.
-      */
-      List<Item> items =
-          em.createQuery("select i from Item i where i.category.id = :catId", Item.class)
-              .setLockMode(LockModeType.OPTIMISTIC)
-              .setParameter("catId", categoryId)
-              .getResultList();
+       * For each <code>Category</code>, query all <code>Item</code> instances with
+       * an <code>OPTIMISTIC</code> lock mode. Hibernate now knows it has to
+       * check each <code>Item</code> at flush time.
+       */
+      List<Item> items = em.createQuery("select i from Item i where i.category.id = :catId", Item.class)
+          .setLockMode(LockModeType.OPTIMISTIC)
+          .setParameter("catId", categoryId)
+          .getResultList();
       for (Item item : items) {
         totalPrice = totalPrice.add(item.getBuyNowPrice());
 
-//        if (item.getId().equals(testData.items.getFirstId())) {
-//          item.setBuyNowPrice(BigDecimal.valueOf(1));
-//        }
-        }
-
+        // if (item.getId().equals(testData.items.getFirstId())) {
+        // item.setBuyNowPrice(BigDecimal.valueOf(1));
+        // }
+      }
 
       // Now a concurrent transaction will move an item to another category
       if (categoryId.equals(testData.categories.getFirstId())) {
@@ -212,14 +212,12 @@ public class Versioning {
                     em2.getTransaction().begin();
 
                     // Moving the first item from the first category into the last category
-                    List<Item> items1 =
-                        em2.createQuery(
-                                "select i from Item i where i.category.id = :catId", Item.class)
-                            .setParameter("catId", testData.categories.getFirstId())
-                            .getResultList();
+                    List<Item> items1 = em2.createQuery(
+                        "select i from Item i where i.category.id = :catId", Item.class)
+                        .setParameter("catId", testData.categories.getFirstId())
+                        .getResultList();
 
-                    Category lastCategory =
-                        em2.getReference(Category.class, testData.categories.getLastId());
+                    Category lastCategory = em2.getReference(Category.class, testData.categories.getLastId());
 
                     items1.iterator().next().setCategory(lastCategory);
 
@@ -242,10 +240,9 @@ public class Versioning {
     em = emf.createEntityManager();
     em.getTransaction().begin();
 
-    List<Item> allItemsFirstCategory =
-        em.createQuery("select i from Item i where i.category.id = :catId", Item.class)
-            .setParameter("catId", testData.categories.getFirstId())
-            .getResultList();
+    List<Item> allItemsFirstCategory = em.createQuery("select i from Item i where i.category.id = :catId", Item.class)
+        .setParameter("catId", testData.categories.getFirstId())
+        .getResultList();
 
     em.getTransaction().commit();
     em.close();
@@ -262,11 +259,11 @@ public class Versioning {
     em.getTransaction().begin();
 
     /*
-       The <code>find()</code> method accepts a <code>LockModeType</code>. The
-       <code>OPTIMISTIC_FORCE_INCREMENT</code> mode tells Hibernate that the version
-       of the retrieved <code>Item</code> should be incremented after loading,
-       even if it's never modified in the unit of work.
-    */
+     * The <code>find()</code> method accepts a <code>LockModeType</code>. The
+     * <code>OPTIMISTIC_FORCE_INCREMENT</code> mode tells Hibernate that the version
+     * of the retrieved <code>Item</code> should be incremented after loading,
+     * even if it's never modified in the unit of work.
+     */
     Item item = em.find(Item.class, ITEM_ID, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
     Bid highestBid = queryHighestBid(em, item);
 
@@ -298,13 +295,13 @@ public class Versioning {
     em.persist(newBid);
 
     /*
-        When flushing the persistence context, Hibernate will execute an
-        <code>INSERT</code> for the new <code>Bid</code> and force an
-        <code>UPDATE</code> of the <code>Item</code> with a version check.
-        If someone modified the <code>Item</code> concurrently, or placed a
-        <code>Bid</code> concurrently with this procedure, Hibernate throws
-        an exception.
-    */
+     * When flushing the persistence context, Hibernate will execute an
+     * <code>INSERT</code> for the new <code>Bid</code> and force an
+     * <code>UPDATE</code> of the <code>Item</code> with a version check.
+     * If someone modified the <code>Item</code> concurrently, or placed a
+     * <code>Bid</code> concurrently with this procedure, Hibernate throws
+     * an exception.
+     */
     assertThrows(RollbackException.class, () -> em.getTransaction().commit());
     em.close();
   }
@@ -312,7 +309,7 @@ public class Versioning {
   private Bid queryHighestBid(EntityManager em, Item item) {
     try {
       return em.createQuery(
-              "select b from Bid b where b.item = :item order by b.amount desc", Bid.class)
+          "select b from Bid b where b.item = :item order by b.amount desc", Bid.class)
           .setParameter("item", item)
           .setMaxResults(1)
           .getSingleResult();

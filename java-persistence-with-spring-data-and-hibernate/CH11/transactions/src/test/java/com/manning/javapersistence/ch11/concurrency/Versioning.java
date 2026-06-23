@@ -1,10 +1,12 @@
 package com.manning.javapersistence.ch11.concurrency;
 
+import org.hibernate.Session;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.*;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -178,32 +180,37 @@ public class Versioning {
   @Test
   void manualVersionChecking() throws ExecutionException, InterruptedException {
     final ConcurrencyTestData testData = storeCategoriesAndItems();
-    Long[] CATEGORIES = testData.categories.identifiers;
+    Long[] categories = testData.categories.identifiers;
 
     EntityManager em = emf.createEntityManager();
+    /*
+     * READ COMMITTED allows a moved <code>Item</code> to show up in two category
+     * queries within the same transaction. <code>OPTIMISTIC</code> lock mode is
+     * what detects the concurrent move when the transaction completes.
+     */
+    Session session = em.unwrap(Session.class);
+    session.doWork(
+        connection -> connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED));
+
     em.getTransaction().begin();
 
     BigDecimal totalPrice = BigDecimal.ZERO;
-    for (Long categoryId : CATEGORIES) {
+    for (int i = 0; i < categories.length; i++) {
       /*
-       * For each <code>Category</code>, query all <code>Item</code> instances with
-       * an <code>OPTIMISTIC</code> lock mode. Hibernate now knows it has to
+       * (A) For each <code>Category</code>, query all <code>Item</code> instances
+       * with an <code>OPTIMISTIC</code> lock mode. Hibernate now knows it has to
        * check each <code>Item</code> at flush time.
        */
       List<Item> items = em.createQuery("select i from Item i where i.category.id = :catId", Item.class)
           .setLockMode(LockModeType.OPTIMISTIC)
-          .setParameter("catId", categoryId)
+          .setParameter("catId", categories[i])
           .getResultList();
       for (Item item : items) {
+        em.lock(item, LockModeType.OPTIMISTIC);
         totalPrice = totalPrice.add(item.getBuyNowPrice());
-
-        // if (item.getId().equals(testData.items.getFirstId())) {
-        // item.setBuyNowPrice(BigDecimal.valueOf(1));
-        // }
       }
 
-      // Now a concurrent transaction will move an item to another category
-      if (categoryId.equals(testData.categories.getFirstId())) {
+      if (i == 0) {
         Executors.newSingleThreadExecutor()
             .submit(
                 () -> {
@@ -211,21 +218,17 @@ public class Versioning {
                     EntityManager em2 = emf.createEntityManager();
                     em2.getTransaction().begin();
 
-                    // Moving the first item from the first category into the last category
-                    List<Item> items1 = em2.createQuery(
+                    List<Item> itemsInFirstCategory = em2.createQuery(
                         "select i from Item i where i.category.id = :catId", Item.class)
                         .setParameter("catId", testData.categories.getFirstId())
                         .getResultList();
-
                     Category lastCategory = em2.getReference(Category.class, testData.categories.getLastId());
-
-                    items1.iterator().next().setCategory(lastCategory);
+                    itemsInFirstCategory.iterator().next().setCategory(lastCategory);
 
                     em2.getTransaction().commit();
                     em2.close();
                   } catch (Exception ex) {
-                    // this should
-                    throw new RuntimeException("Concurrent operation failure: " + ex, ex);
+                    throw new RuntimeException("Concurrent category move failed: " + ex, ex);
                   }
                   return null;
                 })
@@ -233,21 +236,18 @@ public class Versioning {
       }
     }
 
-    em.getTransaction().commit();
+    /*
+     * (B) For each <code>Item</code> loaded earlier with the locking query,
+     * Hibernate
+     * executes a <code>SELECT</code> during flushing. It checks whether the
+     * database
+     * version of each <code>ITEM</code> row is still the same as when it was
+     * loaded.
+     * The concurrent category move incremented the moved item's version, so commit
+     * fails.
+     */
+    assertThrows(RollbackException.class, () -> em.getTransaction().commit());
     em.close();
-    assertEquals("108.00", totalPrice.toString());
-
-    em = emf.createEntityManager();
-    em.getTransaction().begin();
-
-    List<Item> allItemsFirstCategory = em.createQuery("select i from Item i where i.category.id = :catId", Item.class)
-        .setParameter("catId", testData.categories.getFirstId())
-        .getResultList();
-
-    em.getTransaction().commit();
-    em.close();
-
-    assertEquals(2, allItemsFirstCategory.size());
   }
 
   @Test

@@ -15,10 +15,12 @@ public class Producer extends Thread {
     Random r = new Random();
 
     while (true) {
-      if (Main.bucket.size() < 100) {
-        int number = r.nextInt(1000);
-        Main.bucket.add(number);
-        System.out.println(number + "  was added to bucket");
+      synchronized (Main.bucket) {
+        if (Main.bucket.size() < 100) {
+          int number = r.nextInt(1000);
+          Main.bucket.add(number);
+          System.out.println(number + "  was added to bucket");
+        }
       }
     }
   }

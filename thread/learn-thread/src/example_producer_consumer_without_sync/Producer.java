@@ -13,16 +13,23 @@ public class Producer extends Thread {
   @Override
   public void run() {
     Random r = new Random();
-
-    while (true) {
-      synchronized (Main.bucket) {
-        if (Main.bucket.size() < 100) {
-          int number = r.nextInt(1000);
-          Main.bucket.add(number);
-          System.out.println(number + "  was added to bucket");
+    try {
+      while (true) {
+        synchronized (Main.bucket) {
+          if (Main.bucket.size() < 100) {
+            int number = r.nextInt(1000);
+            Main.bucket.add(number);
+            Main.bucket.notifyAll();
+            System.out.println(number + "  was added to bucket");
+          } else {
+            Main.bucket.wait(); // producer is waiting for the consumer to consume the items
+          }
         }
       }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
+
   }
 
 }

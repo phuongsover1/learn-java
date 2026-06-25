@@ -7,14 +7,21 @@ public class Consumer extends Thread {
 
   @Override
   public void run() {
-    while (true) { // C1 [10] C2 [10]
-      synchronized (Main.bucket) { // decide which is our monitor
-        if (!Main.bucket.isEmpty()) { // C1 [10] C2 [10]
-          int number = Main.bucket.get(0); // C1 [10] -> C1 (Runnable state)
-          Main.bucket.remove(0); // C2 [] -> C2 (Runnable state) -> C1 throw Exception
-          System.out.println(number + " was consumed by " + Thread.currentThread().getName());
+    try {
+      while (true) {
+        synchronized (Main.bucket) { // decide which is our monitor
+          if (!Main.bucket.isEmpty()) {
+            int number = Main.bucket.get(0);
+            Main.bucket.remove(0);
+            Main.bucket.notifyAll();
+            System.out.println(number + " was consumed by " + Thread.currentThread().getName());
+          } else {
+            Main.bucket.wait();
+          }
         }
       }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
 
     // not sync

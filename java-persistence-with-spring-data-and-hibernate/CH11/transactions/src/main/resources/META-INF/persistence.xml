@@ -19,6 +19,8 @@
             <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.use_sql_comments" value="true"/>
             <property name="hibernate.use_identifier_rollback" value="true"/>
+            <!-- Order updates by entity type and primary key to reduce deadlocks from inconsistent row locking order. -->
+            <property name="hibernate.order_updates" value="true"/>
 
             <property name="hibernate.hbm2ddl.auto" value="create"/>
         </properties>

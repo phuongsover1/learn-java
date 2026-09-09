@@ -12,6 +12,7 @@
         <class>com.manning.javapersistence.ch12.proxy.ItemWithExtra</class>
         <class>com.manning.javapersistence.ch12.proxy.ItemWithBatchSize</class>
         <class>com.manning.javapersistence.ch12.proxy.ItemWithSubselect</class>
+        <class>com.manning.javapersistence.ch12.proxy.ItemWithSelectFetch</class>
         <class>com.manning.javapersistence.ch12.proxy.Category</class>
         <class>com.manning.javapersistence.ch12.proxy.Bid</class>
 

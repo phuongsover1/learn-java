@@ -20,15 +20,16 @@ import java.util.List;
  * per QUERY (join fetch / left join fetch), not on the mapping. This
  * experiment shows the classic trap: inner join fetch silently drops
  * parent rows that have no matching child row.
+ *
+ * Each test sets up its own data inside its own transaction and rolls
+ * that transaction back at the end, so the two tests never see each
+ * other's rows regardless of run order.
  */
 public class DynamicEagerFetchExperiment {
 
     private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("ch12");
 
-    private void setUpOneItemWithBidAndOneWithout() {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-
+    private void setUpOneItemWithBidAndOneWithout(EntityManager em) {
         User seller = new User("johndoe");
         em.persist(seller);
         User bidder = new User("janeroe");
@@ -43,16 +44,14 @@ public class DynamicEagerFetchExperiment {
         Item itemWithoutBid = new Item("Item Without Bid", LocalDate.now().plusDays(1), seller);
         em.persist(itemWithoutBid);
 
-        em.getTransaction().commit();
-        em.close();
+        em.flush();
     }
 
     @Test
     public void innerJoinFetchSilentlyDropsItemsWithNoBids() {
-        setUpOneItemWithBidAndOneWithout();
-
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
+        setUpOneItemWithBidAndOneWithout(em);
 
         System.out.println("\n=== join fetch i.bids (INNER JOIN FETCH) ===");
         System.out.println("2 Items exist in the DB: one with a Bid, one without.");
@@ -72,16 +71,15 @@ public class DynamicEagerFetchExperiment {
             System.out.println(" - " + item.getName());
         }
 
-        em.getTransaction().commit();
+        em.getTransaction().rollback();
         em.close();
     }
 
     @Test
     public void leftJoinFetchKeepsItemsWithNoBids() {
-        setUpOneItemWithBidAndOneWithout();
-
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
+        setUpOneItemWithBidAndOneWithout(em);
 
         System.out.println("\n=== left join fetch i.bids (LEFT OUTER JOIN FETCH) ===");
         System.out.println("Same 2 Items. Prediction: BOTH come back - LEFT JOIN keeps the");
@@ -99,7 +97,7 @@ public class DynamicEagerFetchExperiment {
             System.out.println(" - " + item.getName() + " -> " + item.getBids().size() + " bid(s)");
         }
 
-        em.getTransaction().commit();
+        em.getTransaction().rollback();
         em.close();
     }
 }

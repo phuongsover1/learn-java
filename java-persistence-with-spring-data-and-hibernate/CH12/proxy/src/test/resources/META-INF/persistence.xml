@@ -14,6 +14,9 @@
         <class>com.manning.javapersistence.ch12.proxy.ItemWithSubselect</class>
         <class>com.manning.javapersistence.ch12.proxy.ItemWithSelectFetch</class>
         <class>com.manning.javapersistence.ch12.proxy.ItemWithFetchProfile</class>
+        <class>com.manning.javapersistence.ch12.proxy.ItemForEntityGraph</class>
+        <class>com.manning.javapersistence.ch12.proxy.BidForEntityGraph</class>
+        <class>com.manning.javapersistence.ch12.proxy.ImageXForEntityGraph</class>
         <class>com.manning.javapersistence.ch12.proxy.ImageX</class>
         <class>com.manning.javapersistence.ch12.proxy.Category</class>
         <class>com.manning.javapersistence.ch12.proxy.Bid</class>

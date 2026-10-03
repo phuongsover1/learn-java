@@ -8,6 +8,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -22,6 +26,7 @@ public class BasicEntitiesExperiment {
     private EntityManagerFactory emf;
     private EntityManager em;
     private EntityTransaction tx;
+    private Long itemId;
 
     @BeforeEach
     void setUp() {
@@ -29,6 +34,20 @@ public class BasicEntitiesExperiment {
         em = emf.createEntityManager();
         tx = em.getTransaction();
         tx.begin();
+
+        User seller = new User("frank");
+        Item item = new Item("Foo", LocalDate.now().plusDays(7));
+        item.getImages().add("a.jpg");
+        item.getImages().add("b.jpg");
+        Bid bid = new Bid(new BigDecimal("100.00"));
+
+        em.persist(seller);
+        em.persist(item);
+        em.persist(bid);
+
+        em.flush();
+
+        itemId = item.getId();
     }
 
     @AfterEach
@@ -39,15 +58,11 @@ public class BasicEntitiesExperiment {
     }
 
     @Test
-    void persistIndependentEntities() {
-        User seller = new User("frank");
-        Item item = new Item("Foo", LocalDate.now().plusDays(7));
-        Bid bid = new Bid(new BigDecimal("100.00"));
-
-        em.persist(seller);
-        em.persist(item);
-        em.persist(bid);
-
-        em.flush();
+    void retrieveItemWithImage() {
+        Item item = em.find(Item.class, itemId);
+        assertEquals("Foo", item.getName());
+        assertEquals(2, item.getImages().size());
+        assertTrue(item.getImages().contains("a.jpg"));
+        assertTrue(item.getImages().contains("b.jpg"));
     }
 }

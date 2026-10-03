@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: config_server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/phuongsover1/spring-cloud-saved-config
+          
+server:
+  port: 8888

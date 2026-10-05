@@ -1,3 +1,0 @@
-[submodule "spring-cloud/feign-client-in-spring-boot"]
-	path = spring-cloud/Feign-Client-In-Spring-Boot/ecom-inventory-service
-	url = https://github.com/phuongsover1/spring-cloud-1.git

@@ -1,0 +1,3 @@
+[submodule "spring-cloud/ecom-inventory-service"]
+	path = spring-cloud/ecom-inventory-service
+	url = https://github.com/codesnippetjava/ecom-inventory-service.git

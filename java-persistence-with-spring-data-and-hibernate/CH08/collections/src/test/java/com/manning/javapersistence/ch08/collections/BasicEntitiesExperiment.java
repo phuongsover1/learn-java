@@ -27,6 +27,7 @@ public class BasicEntitiesExperiment {
     private EntityManager em;
     private EntityTransaction tx;
     private Long itemId;
+    private Long itemId2;
 
     @BeforeEach
     void setUp() {
@@ -48,21 +49,50 @@ public class BasicEntitiesExperiment {
         em.flush();
 
         itemId = item.getId();
-    }
 
-    @AfterEach
-    void tearDown() {
-        tx.rollback();
+        tx.commit();
         em.close();
-        emf.close();
     }
 
     @Test
     void retrieveItemWithImage() {
+        System.out.println("--- RETRIVE ITEM WITH IMAGE ---");
+        em = emf.createEntityManager();
+        em.getTransaction().begin();
         Item item = em.find(Item.class, itemId);
+
+        em.getTransaction().commit();
         assertEquals("Foo", item.getName());
         assertEquals(2, item.getImages().size());
         assertTrue(item.getImages().contains("a.jpg"));
         assertTrue(item.getImages().contains("b.jpg"));
+
+    }
+
+    @Test
+    void retriveMultipleItemsWithImage() {
+        em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Item item2 = new Item("Bar", LocalDate.now().plusDays(7));
+        item2.getImages().add("a.jpg");
+        item2.getImages().add("b.jpg");
+        em.persist(item2);
+        itemId2 = item2.getId();
+        em.getTransaction().commit();
+        em.close();
+
+        System.out.println("--- RETRIVE ITEMS WITH IMAGE ---");
+        em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Item retriveI1 = em.find(Item.class, itemId);
+        Item retriveI2 = em.find(Item.class, itemId2);
+
+        assertEquals("Foo", retriveI1.getName());
+        assertEquals("Bar", retriveI2.getName());
+        assertEquals(2, retriveI1.getImages().size());
+        assertEquals(2, retriveI2.getImages().size());
+
+        em.getTransaction().commit();
+        em.close();
     }
 }

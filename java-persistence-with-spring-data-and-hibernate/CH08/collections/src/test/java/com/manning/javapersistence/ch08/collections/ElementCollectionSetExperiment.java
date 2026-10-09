@@ -28,6 +28,8 @@ public class ElementCollectionSetExperiment {
     em = emf.createEntityManager();
     tx = em.getTransaction();
     tx.begin();
+
+    em.close();
   }
 
   @AfterEach

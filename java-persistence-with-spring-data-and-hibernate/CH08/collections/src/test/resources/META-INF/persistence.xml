@@ -45,5 +45,26 @@
         </properties>
     </persistence-unit>
 
+    <persistence-unit name="ch08-list">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <class>com.manning.javapersistence.ch08.persistentList.Item</class>
+
+        <properties>
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:list;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false"/>
+            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_identifier_rollback" value="true"/>
+
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
+        </properties>
+    </persistence-unit>
+
 </persistence>
 
